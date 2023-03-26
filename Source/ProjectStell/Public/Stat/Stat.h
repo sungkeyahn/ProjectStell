@@ -35,6 +35,6 @@ public:
 	void SetHp(float newHp);
 	float GetHpRatio()const;
 //레벨 관련
-	void SetLevel(int32 newLevel);
+	virtual void SetLevel(int32 newLevel);
 	int32 GetLevel()const;
 };

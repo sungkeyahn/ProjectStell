@@ -23,7 +23,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void PostInitializeComponents()override;
 
-	//키입력 바인딩 기능 관련 
+//키입력 바인딩 기능 관련 
 private:
 	void UpDown(float NewAxisValue);
 	void LeftRight(float NewAxisValue);
@@ -33,7 +33,7 @@ private:
 	void RightAttack();
 	void Evasion();
 
-	//애니메이션 관련
+//애니메이션 관련
 private:
 	UPROPERTY()
 		class UPlayerCharacterAnim* anim;
@@ -42,7 +42,7 @@ private:
 public:
 	class UPlayerCharacterAnim* GetCharacterAnim();
 
-	//시점,카메라 관련
+//시점,카메라 관련
 public:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 		USpringArmComponent* springArm;
@@ -56,11 +56,15 @@ protected:
 	float armRotationSpeed = 10.0f;
 	void SetViewMode();
 
-	//무기, 공격, 콤보 관련 WeaponManager만들어 따로 관리 예정
+//무기, 공격, 콤보 관련 WeaponManager만들어 따로 관리 예정
 private:
 	class AWeapon* leftWeapon;
 	class AWeapon* rightWeapon;
 public:
 	UFUNCTION(BlueprintCallable)
 		void PutOnWeapon(FName path = "", int hand = 0);
+
+//스텟관련
+	UPROPERTY(VisibleAnywhere, Category = Stat)
+		class UPlayerStat* Stat;
 };

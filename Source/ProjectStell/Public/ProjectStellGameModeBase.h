@@ -6,13 +6,12 @@
 #include "GameFramework/GameModeBase.h"
 #include "ProjectStellGameModeBase.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class PROJECTSTELL_API AProjectStellGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 public:
 		AProjectStellGameModeBase();
+		virtual void PostInitializeComponents() override;
+		virtual void PostLogin(APlayerController* NewPlayer) override;
 };

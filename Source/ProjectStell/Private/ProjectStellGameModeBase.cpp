@@ -3,7 +3,7 @@
 
 #include "ProjectStellGameModeBase.h"
 #include "Player/PlayerCharaterCtrl.h"
-
+#include "Player/PlayerCharacterState.h"
 
 AProjectStellGameModeBase::AProjectStellGameModeBase()
 {
@@ -13,12 +13,20 @@ AProjectStellGameModeBase::AProjectStellGameModeBase()
 		DefaultPawnClass = PlayerPawnBPClass.Class;
 	}
 	PlayerControllerClass = APlayerCharaterCtrl::StaticClass();
-	//PlayerStateClass = AABPlayerState::StaticClass();
+	PlayerStateClass = APlayerCharacterState::StaticClass();
 	//GameStateClass = AABGameState::StaticClass();
-	/*
-	static ConstructorHelpers::FClassFinder<APlayerController> PlayerCtrlBPClass(TEXT("Blueprint'/Game/1_BP/BP_PlayerCtrl.BP_PlayerCtrl_C'"));
-	if (PlayerCtrlBPClass.Class != NULL)
-	{
-		PlayerControllerClass = PlayerCtrlBPClass.Class;
-	}*/
+}
+
+void AProjectStellGameModeBase::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	//ABGameState = Cast<AABGameState>(GameState);
+}
+
+void AProjectStellGameModeBase::PostLogin(APlayerController* NewPlayer)
+{
+	Super::PostLogin(NewPlayer);
+	auto PlayerState = Cast<APlayerCharacterState>(NewPlayer->PlayerState);
+	if(nullptr == PlayerState)return;
+	PlayerState->InitPlayerData();
 }

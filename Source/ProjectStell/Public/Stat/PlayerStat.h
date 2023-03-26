@@ -27,7 +27,8 @@ private:
 		float CurLUCK;
 	UPROPERTY(Transient, VisibleInstanceOnly, Category = Stat, Meta = (AllowPrivateAccess = true))
 		float CurMaxExp;
-//휘발성 데이터
+public:
+	virtual void SetLevel(int32 newLevel)override;
 
 
 

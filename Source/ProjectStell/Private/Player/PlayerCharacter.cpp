@@ -4,6 +4,8 @@
 #include "Player/PlayerCharacter.h"
 #include "Player/PlayerCharacterAnim.h"
 #include "Weapon/Weapon.h"
+#include "Player/PlayerCharacterState.h"
+#include "Stat/PlayerStat.h"
 #include "DrawDebugHelpers.h"
 
 APlayerCharacter::APlayerCharacter()
@@ -12,6 +14,7 @@ APlayerCharacter::APlayerCharacter()
 	//컴포넌트 생성
 	springArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	Stat = CreateDefaultSubobject<UPlayerStat>(TEXT("Stat"));
 
 	//컴포넌트 계층구조 설정
 	springArm->SetupAttachment(GetCapsuleComponent());
@@ -41,6 +44,11 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	//DisableInput(PlayerController);
+
+	auto ps = Cast<APlayerCharacterState>(GetPlayerState());
+	if(nullptr == ps)return;
+	Stat->SetLevel(ps->GetCharacterLevel());
 }
 void APlayerCharacter::Tick(float DeltaTime)
 {
