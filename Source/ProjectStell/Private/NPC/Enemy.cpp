@@ -4,11 +4,13 @@
 #include "NPC/Enemy.h"
 #include "NPC/EnemyAnim.h"
 #include "NPC/EnemyCtrl.h"
-
+#include "Stat/Stat.h"
 #include"DrawDebugHelpers.h"
 
 AEnemy::AEnemy()
 {
+	Stat = CreateDefaultSubobject<UStat>(TEXT("Stat"));
+
 	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBP(TEXT("AnimBlueprint'/Game/1_Animation/ABP/EnemyABP.EnemyABP_C'"));
 	if (AnimBP.Succeeded())
 		GetMesh()->SetAnimInstanceClass(AnimBP.Class);
@@ -18,7 +20,7 @@ AEnemy::AEnemy()
 	GetCapsuleComponent()->SetCapsuleRadius(34.0f);
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Enemy")); //¾ÆÁ÷ ¾È¸¸µë
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -88.0f), FRotator(0.0f, -90.0f, 0.0f));
-	GetMesh()->SetAnimationMode(EAnimationMode::AnimationSingleNode);
+	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
@@ -28,43 +30,31 @@ AEnemy::AEnemy()
 
 	AIControllerClass = AEnemyCtrl::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
-
+	
 	//ÃÊ±â »óÅÂ-> "¼û±è »óÅÂ" 
-	SetActorHiddenInGame(false);
-	SetCanBeDamaged(true);
-
-	IsAttacking = false;
-
+	SetInGameState(EEnemyStateInGame::Init);
 }
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	EnemyCtrl = Cast<AEnemyCtrl>(GetController());
 	if (EnemyCtrl == nullptr)return;
 
-	EnemyCtrl->RunBT();
-	//SetCharacterState(ECharacterState::Loading);
+	SetInGameState(EEnemyStateInGame::Ready);
 }
 void AEnemy::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 	anim = Cast<UEnemyAnim>(GetMesh()->GetAnimInstance());
 	if (nullptr == anim) return;
-	anim->OnMontageEnded.AddDynamic(this, &AEnemy::OnAttackMontageEnded);
-	anim->OnAttackHitCheck.AddUObject(this, &AEnemy::AttackCheck);
-	/*
-	CharacterStat->OnCharacterHpIsZero.AddLambda([this]()->void
-	{
-		//anim->SetDeadAnim();//??
-		SetActorEnableCollision(false);
-	}
-	);
-	*/
+
+	SetInGameState(EEnemyStateInGame::Loading);
 }
 float AEnemy::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	float FinalDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
-	/*CharacterStat->SetDamage(FinalDamage);*/
+	Stat->SetDamage(FinalDamage);
 	if (CurrentInGameState == EEnemyStateInGame::Dead)
 	{
 		if (EventInstigator->IsPlayerController())
@@ -76,6 +66,7 @@ float AEnemy::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AControl
 			}
 		}
 	}
+
 	return FinalDamage;
 }
 void AEnemy::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
@@ -93,37 +84,40 @@ void AEnemy::SetInGameState(EEnemyStateInGame newState)
 	CurrentInGameState = newState;
 	switch (CurrentInGameState)
 	{
-	case EEnemyStateInGame::Init:
-	{
-		break;
-	}
-	case EEnemyStateInGame::Loading:
-	{
-		SetActorHiddenInGame(true);
-		SetCanBeDamaged(false);
-		//HpBarWidget->SetHiddenInGame(true);
-		break;
-	}
-	case EEnemyStateInGame::Ready:
-	{
-		SetActorHiddenInGame(false);
-		SetCanBeDamaged(true);
-		//HpBarWidget->SetHiddenInGame(false);
-		//CharacterStat->OnCharacterHpIsZero.AddLambda([this]()->void {SetCharacterState(ECharacterState::Dead); });
-		EnemyCtrl->RunBT();
-		break;
-	}
-	case EEnemyStateInGame::Dead:
-	{
-		SetActorEnableCollision(false);
-		SetCanBeDamaged(false);
-		GetMesh()->SetHiddenInGame(false);
-		//HpBarWidget->SetHiddenInGame(false);
-		anim->SetDeadAnim();
-		EnemyCtrl->StopBT();
-		GetWorld()->GetTimerManager().SetTimer(DeadTimerHandle, FTimerDelegate::CreateLambda([this]()->void { Destroy(); }), DeadTimer, false);
-		break;
-	}
+		case EEnemyStateInGame::Init:
+		{
+			SetActorHiddenInGame(true);
+			SetCanBeDamaged(false);
+			break;
+		}
+		case EEnemyStateInGame::Loading:
+		{
+			SetActorHiddenInGame(true);
+			SetCanBeDamaged(false);
+			anim->OnMontageEnded.AddDynamic(this, &AEnemy::OnAttackMontageEnded);
+			anim->OnAttackHitCheck.AddUObject(this, &AEnemy::AttackCheck);
+			Stat->OnHpChanged.AddLambda([this]()->void {anim->PlayEnemyMontage(HitMontage); });
+			Stat->OnHpIsZero.AddLambda([this]()->void {SetInGameState(EEnemyStateInGame::Dead); });
+			break;
+		}
+		case EEnemyStateInGame::Ready:
+		{
+			SetActorHiddenInGame(false);
+			SetCanBeDamaged(true);
+	
+			EnemyCtrl->RunBT();
+			break;
+		}
+		case EEnemyStateInGame::Dead:
+		{
+			SetActorEnableCollision(false);
+			SetCanBeDamaged(false);
+			GetMesh()->SetHiddenInGame(false);
+			anim->SetDeadAnim();
+			EnemyCtrl->StopBT();
+			GetWorld()->GetTimerManager().SetTimer(DeadTimerHandle, FTimerDelegate::CreateLambda([this]()->void { Destroy(); }), DeadTimer, false);
+			break;
+		}
 	}
 
 }

@@ -19,10 +19,10 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void InitializeComponent() override;
-//해당 클래스가 받을 데이터테이블의 행을 나타내는 구조채 
+//데이터 테이블 행 구조채 
 private:
 	struct FBaseStatData* CurStat = nullptr;
-//게임에 존재하는 모든 물체가 가지고 있을 스텟들
+//현재 스텟 관련
 protected:
 	UPROPERTY(EditInstanceOnly, Category = Stat, Meta = (AllowPrivateAccess = true))
 		int32 CurLevel;
@@ -30,9 +30,10 @@ protected:
 		float CurHp;
 //체력 관련
 public:
-	FOnHpIsZeroDelegate OnCharacterHpIsZero;
-	FOnHpChangedDelegate OnCharacterHpChanged;
+	FOnHpIsZeroDelegate OnHpIsZero;
+	FOnHpChangedDelegate OnHpChanged;
 	void SetHp(float newHp);
+	void SetDamage(float NewDamage);
 	float GetHpRatio()const;
 //레벨 관련
 	virtual void SetLevel(int32 newLevel);

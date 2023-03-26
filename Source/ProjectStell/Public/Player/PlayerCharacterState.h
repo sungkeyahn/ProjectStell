@@ -36,3 +36,6 @@ public:
 	UPROPERTY(Transient)
 		int32 DeadCount;
 };
+
+
+

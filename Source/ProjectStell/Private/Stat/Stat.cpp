@@ -8,6 +8,7 @@ UStat::UStat()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	bWantsInitializeComponent = true;
+	CurLevel = 1;
 }
 void UStat::BeginPlay()
 {
@@ -16,17 +17,22 @@ void UStat::BeginPlay()
 void UStat::InitializeComponent()
 {
 	Super::InitializeComponent();
-	SetLevel(0);
+	SetLevel(CurLevel);
 }
 void UStat::SetHp(float newHp)
 {
 	CurHp = newHp;
-	OnCharacterHpChanged.Broadcast();
+	OnHpChanged.Broadcast();
 	if (CurHp < KINDA_SMALL_NUMBER)
 	{
 		CurHp = 0.f;
-		OnCharacterHpIsZero.Broadcast();
+		OnHpIsZero.Broadcast();
 	}
+}
+void UStat::SetDamage(float NewDamage)
+{
+	if (nullptr == CurStat)return;
+	SetHp(FMath::Clamp<float>(CurHp - NewDamage, 0.0f, CurStat->MaxHp));
 }
 float UStat::GetHpRatio()const
 {
