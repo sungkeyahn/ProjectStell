@@ -6,6 +6,7 @@
 #include "Weapon/Weapon.h"
 #include "Player/PlayerCharacterState.h"
 #include "Stat/PlayerStat.h"
+#include "Player/ComboManager.h"
 #include "DrawDebugHelpers.h"
 
 APlayerCharacter::APlayerCharacter()
@@ -15,10 +16,12 @@ APlayerCharacter::APlayerCharacter()
 	springArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Stat = CreateDefaultSubobject<UPlayerStat>(TEXT("Stat"));
-
+	Combo = CreateDefaultSubobject<UComboManager>(TEXT("Combo"));
+	
 	//컴포넌트 계층구조 설정
 	springArm->SetupAttachment(GetCapsuleComponent());
 	camera->SetupAttachment(springArm);
+
 
 	//컴포넌트 초기값 설정
 	GetCapsuleComponent()->SetCapsuleHalfHeight(88.0f);
@@ -79,6 +82,7 @@ void APlayerCharacter::PostInitializeComponents()
 	anim = Cast<UPlayerCharacterAnim>(GetMesh()->GetAnimInstance());
 	if (anim == nullptr) return;
 	anim->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnMontageEnded);
+	Combo->InitComboManager();
 	//anim->OnMontageFeasibleCheck.BindUObject();
 }
 void APlayerCharacter::UpDown(float NewAxisValue)
@@ -97,13 +101,11 @@ void APlayerCharacter::Turn(float NewAxisValue)
 }
 void APlayerCharacter::LeftAttack()
 {
-	anim->SetMirror(true);
-	leftWeapon->Action(EWeaponActionType::Attack);
+	Combo->Attack(true);
 }
 void APlayerCharacter::RightAttack()
 {
-	anim->SetMirror(false);
-	rightWeapon->Action(EWeaponActionType::Attack);
+	Combo->Attack(false);
 }
 void APlayerCharacter::Evasion()
 {
@@ -131,6 +133,14 @@ void APlayerCharacter::SetViewMode()
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
 }
+AWeapon* APlayerCharacter::GetLeftWeapon()
+{
+	return leftWeapon;
+}
+AWeapon* APlayerCharacter::GetRightWeapon()
+{
+	return rightWeapon;
+}
 void APlayerCharacter::PutOnWeapon(FName path, int hand)
 {
 	if (hand == 0)
@@ -146,7 +156,6 @@ void APlayerCharacter::PutOnWeapon(FName path, int hand)
 		}
 		leftWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("hand_lSocket"));
 		leftWeapon->SetOwner(this);
-		leftWeapon->InitWeapon();
 	}
 	else if (hand == 1)
 	{
@@ -161,7 +170,6 @@ void APlayerCharacter::PutOnWeapon(FName path, int hand)
 		}
 		rightWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("hand_rSocket"));
 		rightWeapon->SetOwner(this);
-		rightWeapon->InitWeapon();
 	}
 }
 

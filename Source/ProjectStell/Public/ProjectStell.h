@@ -11,3 +11,8 @@ enum class EEnemyStateInGame :uint8
 };
 
 
+UENUM(BlueprintType)
+enum class EWeaponType :uint8
+{
+	None=0, Sword, Hammer, Axe, Spear, Shield, Dagger
+};

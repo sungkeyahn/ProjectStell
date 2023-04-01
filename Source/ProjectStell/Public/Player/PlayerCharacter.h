@@ -5,11 +5,7 @@
 #include "ProjectStell.h"
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
-UENUM(BlueprintType)
-enum class EPlayerActionType : uint8 //캐릭터가 할수 있는 행동들
-{
-	None, Hit
-};
+
 UCLASS()
 class PROJECTSTELL_API APlayerCharacter : public ACharacter
 {
@@ -56,14 +52,19 @@ protected:
 	float armRotationSpeed = 10.0f;
 	void SetViewMode();
 
-//무기, 공격, 콤보 관련 WeaponManager만들어 따로 관리 예정
+//무기 관련 
 private:
 	class AWeapon* leftWeapon;
 	class AWeapon* rightWeapon;
 public:
+	class AWeapon* GetLeftWeapon();
+	class AWeapon* GetRightWeapon();
+
 	UFUNCTION(BlueprintCallable)
 		void PutOnWeapon(FName path = "", int hand = 0);
-
+//콤보 관련	
+	UPROPERTY(VisibleAnywhere, Category = Combo)
+		class UComboManager* Combo;
 //스텟관련
 	UPROPERTY(VisibleAnywhere, Category = Stat)
 		class UPlayerStat* Stat;

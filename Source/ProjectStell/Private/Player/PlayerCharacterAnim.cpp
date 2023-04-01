@@ -18,24 +18,41 @@ void UPlayerCharacterAnim::NativeUpdateAnimation(float DeltaSeconds)
 		CurrentPawnSpeed = pawn->GetVelocity().Size();
 	}
 }
-void UPlayerCharacterAnim::AnimNotify_ComboCheck()
+void UPlayerCharacterAnim::SetNextAttack(UAnimMontage* nextMontage, float playSpeed)
 {
-	OnNextAttackComboCheck.Broadcast();
+	NextMontage = nextMontage;
+	NextMontagePlaySpeed = playSpeed;
 }
 void UPlayerCharacterAnim::AnimNotify_HitCheck()
 {
 	OnAttackHitCheck.Broadcast();
 }
+void UPlayerCharacterAnim::AnimNotify_ConnectCheck()
+{
+	OnAttackTimeCheck.Broadcast();
+	//if (NextMontage == nullptr)
+	//	  OnAttackEndCheck.Broadcast();
+	//else
+	//PlayPlayerMontage(NextMontage, NextMontagePlaySpeed);
+	//SetNextAttack(nullptr, 1.f);
+}
+
+void UPlayerCharacterAnim::AnimNotify_EndCheck()
+{
+	OnAttackEndCheck.Broadcast();
+}
+
 void UPlayerCharacterAnim::PlayPlayerMontage(UAnimMontage* montage, float PalySpeed)
 {
-	if (OnMontageFeasibleCheck.Execute(montage))
+	if (montage == nullptr)return;
 		Montage_Play(montage, PalySpeed);
 }
-void UPlayerCharacterAnim::NextSectionPlay_PlayerMontage(UAnimMontage* montage, int32 nextSectionNum)
+void UPlayerCharacterAnim::StopPlayerMontage(UAnimMontage* montage)
 {
+	if (montage == nullptr)return;
 	if (Montage_IsPlaying(montage))
-		if (OnMontageFeasibleCheck.Execute(montage))
-			Montage_JumpToSection(montage->GetSectionName(nextSectionNum - 1), montage);
+		Montage_Stop(0.0f, montage);
+
 }
 
 
