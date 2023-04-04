@@ -9,8 +9,6 @@ enum class EEnemyStateInGame :uint8
 {
 	Init, Loading, Ready, Dead
 };
-
-
 UENUM(BlueprintType)
 enum class EWeaponType :uint8
 {

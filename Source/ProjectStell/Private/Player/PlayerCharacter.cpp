@@ -22,7 +22,6 @@ APlayerCharacter::APlayerCharacter()
 	springArm->SetupAttachment(GetCapsuleComponent());
 	camera->SetupAttachment(springArm);
 
-
 	//컴포넌트 초기값 설정
 	GetCapsuleComponent()->SetCapsuleHalfHeight(88.0f);
 	GetCapsuleComponent()->SetCapsuleRadius(34.0f);
@@ -48,7 +47,6 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	//DisableInput(PlayerController);
-
 	auto ps = Cast<APlayerCharacterState>(GetPlayerState());
 	if(nullptr == ps)return;
 	Stat->SetLevel(ps->GetCharacterLevel());
@@ -59,14 +57,16 @@ void APlayerCharacter::Tick(float DeltaTime)
 	springArm->TargetArmLength = FMath::FInterpTo(springArm->TargetArmLength, armLengthTo, DeltaTime, armLengthSpeed);
 	if (directionToMove.SizeSquared() > 0.0f)
 	{
-		GetController()->SetControlRotation(FRotationMatrix::MakeFromX(directionToMove).Rotator());
-		AddMovementInput(directionToMove);
+		if (anim->IsAnyMontagePlaying() == false)
+		{
+			GetController()->SetControlRotation(FRotationMatrix::MakeFromX(directionToMove).Rotator());
+			AddMovementInput(directionToMove);
+		}
 	}
 }
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	//플레이어 키입력 바인딩 
 	PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &APlayerCharacter::UpDown);
 	PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &APlayerCharacter::LeftRight);
 	PlayerInputComponent->BindAxis(TEXT("TurnRight"), this, &APlayerCharacter::Turn); //마우스 좌우 이동
@@ -75,29 +75,49 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction(TEXT("Evasion"), EInputEvent::IE_Pressed, this, &APlayerCharacter::Evasion);
 	PlayerInputComponent->BindAction(TEXT("LeftAttack"), EInputEvent::IE_Pressed, this, &APlayerCharacter::LeftAttack);
 	PlayerInputComponent->BindAction(TEXT("RightAttack"), EInputEvent::IE_Pressed, this, &APlayerCharacter::RightAttack);
+	PlayerInputComponent->BindAction(TEXT("KillPlayer"), EInputEvent::IE_Pressed, this, &APlayerCharacter::KillPlayer);
 }
 void APlayerCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 	anim = Cast<UPlayerCharacterAnim>(GetMesh()->GetAnimInstance());
 	if (anim == nullptr) return;
-	anim->OnMontageEnded.AddDynamic(this, &APlayerCharacter::OnMontageEnded);
+	anim->OnDashStart.AddLambda
+	([this]()->void
+	{
+		IsDashing = true;
+		GetCharacterMovement()->BrakingFrictionFactor = 0.f;
+		SetCanBeDamaged(false);
+	}
+	);
+	anim->OnDashEnd.AddLambda
+	([this]()->void
+	{
+		IsDashing = false;
+		GetCharacterMovement()->BrakingFrictionFactor = 2.f;
+		SetCanBeDamaged(true);
+	}
+	);
+
 	Combo->InitComboManager();
-	//anim->OnMontageFeasibleCheck.BindUObject();
 }
 void APlayerCharacter::UpDown(float NewAxisValue)
 {
 	directionToMove.X = NewAxisValue;
+	//AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::X), NewAxisValue);
 }
 void APlayerCharacter::LeftRight(float NewAxisValue)
 {
 	directionToMove.Y = NewAxisValue;
+	//AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::Y), NewAxisValue);
 }
 void APlayerCharacter::LookUp(float NewAxisValue)
 {
+	//AddControllerPitchInput(NewAxisValue * 45.f * GetWorld()->GetDeltaSeconds());
 }
 void APlayerCharacter::Turn(float NewAxisValue)
 {
+	//AddControllerYawInput(NewAxisValue * 45.f * GetWorld()->GetDeltaSeconds());
 }
 void APlayerCharacter::LeftAttack()
 {
@@ -109,11 +129,34 @@ void APlayerCharacter::RightAttack()
 }
 void APlayerCharacter::Evasion()
 {
-	//Weapon->Attack(EAttackType::RightMouse);
-}
-void APlayerCharacter::OnMontageEnded(UAnimMontage* Montage, bool bInterrupted)
-{
-	// hit 나 기타 캐릭터 혼자만의 동작을 몽타주로 표현되는경우 의 몽타주 종료 로직 작성부분
+	if (anim->IsAnyMontagePlaying()||IsDashing|| DashCount <= 0) return;
+	--DashCount;
+	GetWorldTimerManager().SetTimer(DashCoolTimerHandle, this, &APlayerCharacter::DashCoolTimer, 1.0f, true);
+	
+	const int32 FB = directionToMove.X;
+	const int32 RL = directionToMove.Y;
+	//const FRotator Rotation = GetActorRotation(); //이게 아니라 키보드 입력 바탕으로 방향을 정해서 넣어 주어야 함
+	FRotator Rotation = GetActorRotation();
+	if (RL == 0 && FB > 0)
+		Rotation = FRotator(0, 0, 0);
+	else if (RL == 0 && FB < 0)
+		Rotation = FRotator(0, 180, 0);
+	else if (FB == 0 && RL > 0)
+		Rotation = FRotator(0, 90, 0);
+	else if (FB == 0 && RL < 0)
+		Rotation = FRotator(0, -90, 0);
+	else if (FB > 0 && RL > 0) //wd
+		Rotation = FRotator(0, 45, 0);
+	else if (FB > 0 && RL < 0) //wa
+		Rotation = FRotator(0, -45, 0);
+	else if (FB < 0 && RL < 0) //sa
+		Rotation = FRotator(0, -135, 0);
+	else if (FB < 0 && RL > 0) //sd
+		Rotation = FRotator(0, 135, 0);
+	const FRotator YawRotation(0, Rotation.Yaw, 0);
+	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	LaunchCharacter(Direction * 2000.f, true, true);
+	anim->PlayPlayerMontage(DashMontage);
 }
 UPlayerCharacterAnim* APlayerCharacter::GetCharacterAnim()
 {
@@ -121,7 +164,7 @@ UPlayerCharacterAnim* APlayerCharacter::GetCharacterAnim()
 }
 void APlayerCharacter::SetViewMode()
 {
-	armLengthTo = 800.0f;// == springArm->TargetArmLength = 800.0f;
+	armLengthTo = 600.0f;// == springArm->TargetArmLength = 800.0f;
 	armRotationTo = FRotator(-45.0f, 0.0f, 0.0f);// == springArm->SetRelativeRotation(FRotator(-45.0f,0.0f,0.0f));
 	springArm->bUsePawnControlRotation = false;
 	springArm->bInheritPitch = false;
@@ -131,7 +174,7 @@ void APlayerCharacter::SetViewMode()
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;
-	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);//540.f , 720.f
 }
 AWeapon* APlayerCharacter::GetLeftWeapon()
 {
@@ -172,4 +215,18 @@ void APlayerCharacter::PutOnWeapon(FName path, int hand)
 		rightWeapon->SetOwner(this);
 	}
 }
-
+void APlayerCharacter::DashCoolTimer()
+{
+	--DashCoolTime;
+	if (DashCoolTime < 1)
+	{
+		DashCount++;
+		DashCoolTime = 10;
+		if(DashCount==2)
+			GetWorldTimerManager().ClearTimer(DashCoolTimerHandle);;
+	}
+}
+void APlayerCharacter::KillPlayer()
+{
+}d
+ 

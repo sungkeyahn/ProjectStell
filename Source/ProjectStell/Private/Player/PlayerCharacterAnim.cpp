@@ -41,7 +41,14 @@ void UPlayerCharacterAnim::AnimNotify_EndCheck()
 {
 	OnAttackEndCheck.Broadcast();
 }
-
+void UPlayerCharacterAnim::AnimNotify_DashStart()
+{
+	OnDashStart.Broadcast();
+}
+void UPlayerCharacterAnim::AnimNotify_DashEnd()
+{
+	OnDashEnd.Broadcast();
+}
 void UPlayerCharacterAnim::PlayPlayerMontage(UAnimMontage* montage, float PalySpeed)
 {
 	if (montage == nullptr)return;

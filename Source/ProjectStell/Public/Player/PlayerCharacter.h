@@ -33,8 +33,6 @@ private:
 private:
 	UPROPERTY()
 		class UPlayerCharacterAnim* anim;
-	UFUNCTION()
-		void OnMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 public:
 	class UPlayerCharacterAnim* GetCharacterAnim();
 
@@ -68,4 +66,22 @@ public:
 //스텟관련
 	UPROPERTY(VisibleAnywhere, Category = Stat)
 		class UPlayerStat* Stat;
+//대쉬 관련
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Dash, Meta = (AllowPrivateAccess = true))
+		class UAnimMontage* DashMontage = nullptr;
+	UPROPERTY(VisibleAnywhere,Category = Dash)
+		bool IsDashing;
+	UPROPERTY(VisibleAnywhere, Category = Dash)
+		int32 DashCount = 2;
+	UPROPERTY(VisibleAnywhere,Category = Dash)
+		int32 DashCoolTime = 10;
+	FTimerHandle DashCoolTimerHandle;
+	void DashCoolTimer();
+
+	//FTimerHandle PlayerDstroyTimerHandle;
+	//float currentPlayerDestroyerCoolTime = 0;
+
+//나중에 뺄 기능
+	void KillPlayer();
 };
