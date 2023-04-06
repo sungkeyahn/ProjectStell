@@ -5,8 +5,6 @@
 
 UStellSaveGame::UStellSaveGame()
 {
-	Level=1;
-	Exp=0;
 	PlayTime=0;
 	DeadCount=0;
 }

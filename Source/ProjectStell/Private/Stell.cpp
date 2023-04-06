@@ -15,9 +15,6 @@ UStell::UStell()
 	static ConstructorHelpers::FObjectFinder<UDataTable>dd(*path);
 	if (dd.Succeeded()) StatDataTable2 = dd.Object;
 	if (StatDataTable2->GetRowMap().Num() < 0) return;
-
-
-
 }
 void UStell::Init()
 {

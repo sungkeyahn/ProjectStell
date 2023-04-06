@@ -12,14 +12,8 @@ class PROJECTSTELL_API UStellSaveGame : public USaveGame
 	GENERATED_BODY()
 public:
 	UStellSaveGame();
-
-	UPROPERTY()
-		int32 Level;
-	UPROPERTY()
-		int32 Exp;
 	UPROPERTY()
 		int32 PlayTime;
 	UPROPERTY()
 		int32 DeadCount;
-
 };

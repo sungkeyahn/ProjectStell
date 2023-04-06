@@ -8,53 +8,40 @@ UStat::UStat()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	bWantsInitializeComponent = true;
-	CurLevel = 1;
-}
-void UStat::BeginPlay()
-{
-	Super::BeginPlay();	
 }
 void UStat::InitializeComponent()
 {
 	Super::InitializeComponent();
-	SetLevel(CurLevel);
+	SetStat(FStatStruct().MaxHp);
 }
 void UStat::SetHp(float newHp)
 {
-	CurHp = newHp;
+	CurrentHp = newHp;
 	OnHpChanged.Broadcast();
-	if (CurHp < KINDA_SMALL_NUMBER)
+	if (CurrentHp < KINDA_SMALL_NUMBER)
 	{
-		CurHp = 0.f;
+		CurrentHp = 0.f;
 		OnHpIsZero.Broadcast();
 	}
 }
 void UStat::SetDamage(float NewDamage)
 {
-	if (nullptr == CurStat)return;
-	SetHp(FMath::Clamp<float>(CurHp - NewDamage, 0.0f, CurStat->MaxHp));
+	SetHp(FMath::Clamp<float>(CurrentHp - NewDamage, 0.0f, 10));
 }
 float UStat::GetHpRatio()const
 {
-	if (CurStat == nullptr) return 0.f;
-	if (CurStat->MaxHp < KINDA_SMALL_NUMBER) return 0.f;
-	return (CurHp / CurStat->MaxHp);
+	if (CurrentHp<=0.f) return 0.f;
+	return (CurrentHp / 10.f);
 }
-void UStat::SetLevel(int32 newLevel)
+void UStat::SetStat(float newStat)
 {
+	/*
 	auto GameInst = Cast<UStell>(UGameplayStatics::GetGameInstance((GetWorld())));
 	if (GameInst == nullptr) return;
-	CurStat = GameInst->GetDataTableRow(newLevel);
-	if (CurStat != nullptr)
-	{
-		CurLevel = newLevel;
-		SetHp(CurStat->MaxHp);
-	}
+	CurHp = GameInst->GetDataTableRow(newStat);*/
+	SetHp(newStat);
 }
-int32 UStat::GetLevel()const
-{
-	return CurLevel;
-}
+
 
 
 

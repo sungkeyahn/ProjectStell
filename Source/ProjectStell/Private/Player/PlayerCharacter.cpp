@@ -3,11 +3,14 @@
 
 #include "Player/PlayerCharacter.h"
 #include "Player/PlayerCharacterAnim.h"
+#include "Player/PlayerCharaterCtrl.h"
 #include "Weapon/Weapon.h"
-#include "Player/PlayerCharacterState.h"
 #include "Stat/PlayerStat.h"
 #include "Player/ComboManager.h"
+#include "Player/PlayerCharacterState.h"
 #include "DrawDebugHelpers.h"
+
+
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -46,10 +49,16 @@ APlayerCharacter::APlayerCharacter()
 void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	PlayerCtrl = Cast<APlayerCharaterCtrl>(GetController());
+	if (nullptr == PlayerCtrl)return;
 	//DisableInput(PlayerController);
-	auto ps = Cast<APlayerCharacterState>(GetPlayerState());
-	if(nullptr == ps)return;
-	Stat->SetLevel(ps->GetCharacterLevel());
+	/*
+	#include "ProjectStellGameModeBase.h"
+	auto gm = Cast<AProjectStellGameModeBase>(GetWorld()->GetAuthGameMode());
+	if (gm == nullptr)return;
+	gm->AddScore(PlayerCtrl);
+	*/
+
 }
 void APlayerCharacter::Tick(float DeltaTime)
 {
@@ -98,6 +107,15 @@ void APlayerCharacter::PostInitializeComponents()
 		SetCanBeDamaged(true);
 	}
 	);
+	Stat->OnHpIsZero.AddLambda
+	([this]()->void
+	{
+	anim->SetDeadAnim();
+	SetActorEnableCollision(false);
+	GetWorldTimerManager().SetTimer(CharacterDstroyTimerHandle, this, &APlayerCharacter::CharacterDestroyTimer, 1.0f, true);
+	}
+	);
+	//Stat->OnHpChanged.AddLambda();
 
 	Combo->InitComboManager();
 }
@@ -176,6 +194,12 @@ void APlayerCharacter::SetViewMode()
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);//540.f , 720.f
 }
+float APlayerCharacter::TakeDamage(float DamageAmout, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	const float FinalDamage = Super::TakeDamage(DamageAmout, DamageEvent, EventInstigator, DamageCauser);
+	Stat->SetDamage(FinalDamage);
+	return FinalDamage;
+}
 AWeapon* APlayerCharacter::GetLeftWeapon()
 {
 	return leftWeapon;
@@ -228,5 +252,22 @@ void APlayerCharacter::DashCoolTimer()
 }
 void APlayerCharacter::KillPlayer()
 {
-}d
+	Stat->SetDamage(100.f);
+}
+void APlayerCharacter::CharacterDestroyTimer()
+{
+	++CharacterDstroyCoolTime;
+	if (CharacterDstroyCoolTime > 5.f)
+	{
+		GetWorldTimerManager().ClearTimer(CharacterDstroyTimerHandle);
+		auto ps = Cast<APlayerCharacterState>(GetPlayerState());
+		if (nullptr != ps) ps->AddDeadCount();
+		//GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Red, FString::Printf(TEXT("%d"), ps->GetDeadCount()));
+		//게임 저장과 사망 UI띄우고 게임 멈추기 기능 필요
+	}
+	else if (CharacterDstroyCoolTime > 3.f)
+	{
+		SetActorHiddenInGame(true);
+	}
+}
  

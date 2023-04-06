@@ -12,10 +12,12 @@ UPlayerStat::UPlayerStat()
 void UPlayerStat::InitializeComponent()
 {
 	Super::InitializeComponent();
-	auto GameInst = Cast<UStell>(UGameplayStatics::GetGameInstance((GetWorld())));
-	if (GameInst == nullptr) return;
-	CurPlayerStat = GameInst->GetPlayerStatDataTableRow(CurLevel);
 }
+void UPlayerStat::SetStat(float newStat)
+{
+	Super::SetStat(newStat);
+}
+/*
 void UPlayerStat::SetLevel(int32 newLevel)
 {
 	Super::SetLevel(newLevel);
@@ -30,5 +32,5 @@ void UPlayerStat::SetLevel(int32 newLevel)
 		CurLUCK = CurPlayerStat->LUCK;
 		CurMaxExp = CurPlayerStat->MaxExp;
 	}
-}
+}*/
 

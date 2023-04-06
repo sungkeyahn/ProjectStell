@@ -35,8 +35,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data")
 		float MaxExp;
 };
-
-
 UCLASS()
 class PROJECTSTELL_API UStell : public UGameInstance
 {
@@ -44,15 +42,14 @@ class PROJECTSTELL_API UStell : public UGameInstance
 public:
 	UStell();
 	virtual void Init()override;
-//게임 시작시 첫 데이터 로딩 부분
+//로딩에 쓸 데이터 테이블
 private:
 	UPROPERTY()
 		class UDataTable* StatDataTable;
 	UPROPERTY()
 		class UDataTable* StatDataTable2;
-//모든 데이터테이블 마다 하나의 Getter가 필요
+//데이터 테이블마다 Getter가 필요
 public:
 	FBaseStatData* GetDataTableRow(int32 Level);
 	FPlayerStatDataByLevel* GetPlayerStatDataTableRow(int32 Level);
-
 };

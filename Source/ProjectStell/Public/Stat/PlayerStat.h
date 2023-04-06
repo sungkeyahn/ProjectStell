@@ -14,7 +14,8 @@ public:
 	UPlayerStat();
 protected:
 	virtual void InitializeComponent() override;
-//데이터 테이블으로 로딩해서 적용시킬 수치들 (비휘발성)
+	virtual void SetStat(float newStat)override;
+/*
 private:
 	struct FPlayerStatDataByLevel* CurPlayerStat = nullptr;
 	UPROPERTY(EditInstanceOnly, Category = Stat, Meta = (AllowPrivateAccess = true))
@@ -27,9 +28,6 @@ private:
 		float CurLUCK;
 	UPROPERTY(Transient, VisibleInstanceOnly, Category = Stat, Meta = (AllowPrivateAccess = true))
 		float CurMaxExp;
-public:
-	virtual void SetLevel(int32 newLevel)override;
-
-
+*/
 
 };

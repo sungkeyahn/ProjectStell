@@ -62,6 +62,6 @@ private:
 	void AttackCheck();
 	//»ç¸Á
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = State, Meta = (AllowPrivateAccess = true))
-		float DeadTimer;
-	FTimerHandle DeadTimerHandle = {};
+		float DeadTime = 0;
+	FTimerHandle DeadTimerHandle;
 };

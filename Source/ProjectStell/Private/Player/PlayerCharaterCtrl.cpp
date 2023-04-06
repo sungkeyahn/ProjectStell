@@ -3,13 +3,18 @@
 
 #include "Player/PlayerCharaterCtrl.h"
 #include "UI/GamePauseMenuWidget.h"
-
+#include "UI/GameClearMenuWidget.h"
 APlayerCharaterCtrl::APlayerCharaterCtrl()
 {
 	static ConstructorHelpers::FClassFinder<UGamePauseMenuWidget> MENU(TEXT("WidgetBlueprint'/Game/1_UI/UI_Menu.UI_Menu_C'"));
 	if (MENU.Succeeded())
 	{
 		MenuWidgetClass = MENU.Class;
+	}
+	static ConstructorHelpers::FClassFinder<UGameClearMenuWidget> UI(TEXT("WidgetBlueprint'/Game/1_UI/UI_Clear.UI_Clear_C'"));
+	if (UI.Succeeded())
+	{
+		ClearWidgetClass = UI.Class;
 	}
 }
 void APlayerCharaterCtrl::PostInitializeComponents()
@@ -43,11 +48,18 @@ void APlayerCharaterCtrl::ChangeInputMode(bool bGameMode)
 		bShowMouseCursor = true;
 	}
 }
-void APlayerCharaterCtrl::GamePause()
+void APlayerCharaterCtrl::GamePause() 
 {
 	MenuWidget = CreateWidget<UGamePauseMenuWidget>(this, MenuWidgetClass);
 	if(nullptr == MenuWidget)return;
 	MenuWidget->AddToViewport(3);
 	SetPause(true);
+	ChangeInputMode(false);
+}
+void APlayerCharaterCtrl::GameClear()
+{
+	ClearWidget = CreateWidget<UGameClearMenuWidget>(this, ClearWidgetClass);
+	if (nullptr == ClearWidget)return;
+	ClearWidget->AddToViewport();
 	ChangeInputMode(false);
 }

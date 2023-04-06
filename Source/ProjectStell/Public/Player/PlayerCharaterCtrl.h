@@ -25,11 +25,20 @@ public:
 	void ChangeInputMode(bool bGameMode = true);
 
 //게임제어 기능 관련
-protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Ui)
-		TSubclassOf<class UGamePauseMenuWidget>MenuWidgetClass;
 private:
 	UPROPERTY()
 		class UGamePauseMenuWidget* MenuWidget;
-	void GamePause();
+	//클리어시 보여줄 데이터가 확정되지 않아 일단 일시정지 클리스로 구현 
+	//사망시 UI도 제작 해야 함
+	UPROPERTY()
+		class UGameClearMenuWidget* ClearWidget;
+	void GamePause();//UI띄어주는 역할
+public:
+	void GameClear();//UI띄어주는 역할
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Ui)
+		TSubclassOf<class UGamePauseMenuWidget>MenuWidgetClass;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Ui)
+		TSubclassOf<class UGameClearMenuWidget>ClearWidgetClass;
+	
 };

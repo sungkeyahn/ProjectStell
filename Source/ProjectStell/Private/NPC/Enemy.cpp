@@ -5,6 +5,7 @@
 #include "NPC/EnemyAnim.h"
 #include "NPC/EnemyCtrl.h"
 #include "Stat/Stat.h"
+#include "ProjectStellGameModeBase.h"
 #include"DrawDebugHelpers.h"
 
 AEnemy::AEnemy()
@@ -48,7 +49,6 @@ void AEnemy::PostInitializeComponents()
 	Super::PostInitializeComponents();
 	anim = Cast<UEnemyAnim>(GetMesh()->GetAnimInstance());
 	if (nullptr == anim) return;
-
 	SetInGameState(EEnemyStateInGame::Loading);
 }
 float AEnemy::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -58,13 +58,7 @@ float AEnemy::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AControl
 	if (CurrentInGameState == EEnemyStateInGame::Dead)
 	{
 		if (EventInstigator->IsPlayerController())
-		{
-			auto playerctrl = Cast<APlayerController>(EventInstigator);
-			if (playerctrl != nullptr)
-			{
-				//playerctrl->MonsterKill(this);
-			}
-		}
+		{}
 	}
 
 	return FinalDamage;
@@ -115,7 +109,19 @@ void AEnemy::SetInGameState(EEnemyStateInGame newState)
 			GetMesh()->SetHiddenInGame(false);
 			anim->SetDeadAnim();
 			EnemyCtrl->StopBT();
-			GetWorld()->GetTimerManager().SetTimer(DeadTimerHandle, FTimerDelegate::CreateLambda([this]()->void { Destroy(); }), DeadTimer, false);
+			GetWorld()->GetTimerManager().SetTimer(DeadTimerHandle, FTimerDelegate::CreateLambda([this]()->void
+			{ 	
+				++DeadTime;
+				if (DeadTime > 3.f)
+				{
+					GetWorldTimerManager().ClearTimer(DeadTimerHandle);
+					SetActorHiddenInGame(true);
+					Destroy();
+					auto gm = Cast<AProjectStellGameModeBase>(GetWorld()->GetAuthGameMode());
+					if (nullptr != gm) gm->AddScore();
+				}
+			}), 1.0f, true);
+
 			break;
 		}
 	}
@@ -139,7 +145,7 @@ void AEnemy::AttackCheck()
 		GetActorLocation(),
 		GetActorLocation() + GetActorForwardVector() * AttackRange,
 		FQuat::Identity,
-		ECollisionChannel::ECC_GameTraceChannel3,
+		ECollisionChannel::ECC_GameTraceChannel1,
 		FCollisionShape::MakeSphere(AttackRadius),
 		params
 	);
@@ -162,3 +168,4 @@ void AEnemy::AttackCheck()
 		}
 	}
 }
+

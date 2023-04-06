@@ -35,7 +35,8 @@ private:
 		class UPlayerCharacterAnim* anim;
 public:
 	class UPlayerCharacterAnim* GetCharacterAnim();
-
+//컨트롤러 관련
+	class APlayerCharaterCtrl* PlayerCtrl;
 //시점,카메라 관련
 public:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -49,7 +50,11 @@ protected:
 	float armLengthSpeed = 3.0f;
 	float armRotationSpeed = 10.0f;
 	void SetViewMode();
-
+//피격 관련
+public:
+	virtual float TakeDamage(float DamageAmout,
+		struct FDamageEvent const& DamageEvent,
+		class AController* EventInstigator, AActor* DamageCauser)override;
 //무기 관련 
 private:
 	class AWeapon* leftWeapon;
@@ -78,10 +83,10 @@ private:
 		int32 DashCoolTime = 10;
 	FTimerHandle DashCoolTimerHandle;
 	void DashCoolTimer();
-
-	//FTimerHandle PlayerDstroyTimerHandle;
-	//float currentPlayerDestroyerCoolTime = 0;
-
-//나중에 뺄 기능
+//사망 관련
+private:
 	void KillPlayer();
+	FTimerHandle CharacterDstroyTimerHandle;
+	float CharacterDstroyCoolTime = 0;
+	void CharacterDestroyTimer();
 };

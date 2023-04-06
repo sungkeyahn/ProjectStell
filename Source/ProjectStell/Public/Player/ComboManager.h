@@ -17,7 +17,7 @@ public:
 //캐릭터 관련
 private:
 	class APlayerCharacter* character;
-//공격 상태 관련
+//공격 관련
 private:
 	FAttackInfoStruct PreAttackInfo;	
 	FAttackInfoStruct CurrentAttackInfo;

@@ -62,4 +62,5 @@ public:
 	void SetNextAttack(class UAnimMontage* nextMontage, float playSpeed);
 	void PlayPlayerMontage(UAnimMontage* montage, float PalySpeed = 1.0f);
 	void StopPlayerMontage(UAnimMontage* montage);
+	void SetDeadAnim() { IsDead = true; }
 };

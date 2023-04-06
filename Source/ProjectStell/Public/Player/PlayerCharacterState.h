@@ -6,35 +6,29 @@
 #include "GameFramework/PlayerState.h"
 #include "PlayerCharacterState.generated.h"
 
-DECLARE_MULTICAST_DELEGATE(FOnPlayerStateChangedDelegate);
 UCLASS()
 class PROJECTSTELL_API APlayerCharacterState : public APlayerState
 {
 	GENERATED_BODY()
-
 public:
 	APlayerCharacterState();
+private:
+	void LoadPlayerData(class UStellSaveGame* save);
+public:
 	FString SaveSlotName;
 	void InitPlayerData();
 	void SavePlayerData();
-
-	FOnPlayerStateChangedDelegate OnPlayerStateChanged;
-
-private:
-	struct FBaseStatData* CurrentStatData1;
-	struct FPlayerStatDataByLevel* CurrentStatData2;
-	void SetCharacterLevel(int32 NewCharacterLevel);
+protected:
+	UPROPERTY(Transient)
+		float PlayTime=0;
+	UPROPERTY(Transient)
+		int32 DeadCount=0;
 public:
-	int32 GetCharacterLevel() const;
-public:
-	UPROPERTY(Transient)
-		int32 CharacterLevel;
-	UPROPERTY(Transient)
-		int32 Exp;	
-	UPROPERTY(Transient)
-		int32 PlayTime;
-	UPROPERTY(Transient)
-		int32 DeadCount;
+	void AddPlayTime();//게임시간 기록하는부분찿기 게임모드에서 
+	void AddDeadCount();
+	int32 GetDeadCount();
+
+
 };
 
 
