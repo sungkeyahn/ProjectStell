@@ -182,7 +182,7 @@ UPlayerCharacterAnim* APlayerCharacter::GetCharacterAnim()
 }
 void APlayerCharacter::SetViewMode()
 {
-	armLengthTo = 600.0f;// == springArm->TargetArmLength = 800.0f;
+	armLengthTo = 400.0f;// == springArm->TargetArmLength = 800.0f;
 	armRotationTo = FRotator(-45.0f, 0.0f, 0.0f);// == springArm->SetRelativeRotation(FRotator(-45.0f,0.0f,0.0f));
 	springArm->bUsePawnControlRotation = false;
 	springArm->bInheritPitch = false;
