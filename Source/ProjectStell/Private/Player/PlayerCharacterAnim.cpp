@@ -18,11 +18,6 @@ void UPlayerCharacterAnim::NativeUpdateAnimation(float DeltaSeconds)
 		CurrentPawnSpeed = pawn->GetVelocity().Size();
 	}
 }
-void UPlayerCharacterAnim::SetNextAttack(UAnimMontage* nextMontage, float playSpeed)
-{
-	NextMontage = nextMontage;
-	NextMontagePlaySpeed = playSpeed;
-}
 void UPlayerCharacterAnim::AnimNotify_HitCheck()
 {
 	OnAttackHitCheck.Broadcast();
@@ -30,13 +25,7 @@ void UPlayerCharacterAnim::AnimNotify_HitCheck()
 void UPlayerCharacterAnim::AnimNotify_ConnectCheck()
 {
 	OnAttackTimeCheck.Broadcast();
-	//if (NextMontage == nullptr)
-	//	  OnAttackEndCheck.Broadcast();
-	//else
-	//PlayPlayerMontage(NextMontage, NextMontagePlaySpeed);
-	//SetNextAttack(nullptr, 1.f);
 }
-
 void UPlayerCharacterAnim::AnimNotify_EndCheck()
 {
 	OnAttackEndCheck.Broadcast();
@@ -59,7 +48,6 @@ void UPlayerCharacterAnim::StopPlayerMontage(UAnimMontage* montage)
 	if (montage == nullptr)return;
 	if (Montage_IsPlaying(montage))
 		Montage_Stop(0.0f, montage);
-
 }
 
 

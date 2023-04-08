@@ -10,8 +10,6 @@
 #include "Player/PlayerCharacterState.h"
 #include "DrawDebugHelpers.h"
 
-
-
 APlayerCharacter::APlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -43,7 +41,6 @@ APlayerCharacter::APlayerCharacter()
 	if (AnimBP.Succeeded())
 		GetMesh()->SetAnimInstanceClass(AnimBP.Class);
 
-	//초기 실행필요 함수, 변수 
 	SetViewMode();
 }
 void APlayerCharacter::BeginPlay()
@@ -52,13 +49,6 @@ void APlayerCharacter::BeginPlay()
 	PlayerCtrl = Cast<APlayerCharaterCtrl>(GetController());
 	if (nullptr == PlayerCtrl)return;
 	//DisableInput(PlayerController);
-	/*
-	#include "ProjectStellGameModeBase.h"
-	auto gm = Cast<AProjectStellGameModeBase>(GetWorld()->GetAuthGameMode());
-	if (gm == nullptr)return;
-	gm->AddScore(PlayerCtrl);
-	*/
-
 }
 void APlayerCharacter::Tick(float DeltaTime)
 {
@@ -147,13 +137,12 @@ void APlayerCharacter::RightAttack()
 }
 void APlayerCharacter::Evasion()
 {
-	if (anim->IsAnyMontagePlaying()||IsDashing|| DashCount <= 0) return;
+	//anim->IsAnyMontagePlaying()||
+	if (IsDashing|| DashCount <= 0) return;
 	--DashCount;
 	GetWorldTimerManager().SetTimer(DashCoolTimerHandle, this, &APlayerCharacter::DashCoolTimer, 1.0f, true);
-	
 	const int32 FB = directionToMove.X;
 	const int32 RL = directionToMove.Y;
-	//const FRotator Rotation = GetActorRotation(); //이게 아니라 키보드 입력 바탕으로 방향을 정해서 넣어 주어야 함
 	FRotator Rotation = GetActorRotation();
 	if (RL == 0 && FB > 0)
 		Rotation = FRotator(0, 0, 0);
@@ -173,8 +162,12 @@ void APlayerCharacter::Evasion()
 		Rotation = FRotator(0, 135, 0);
 	const FRotator YawRotation(0, Rotation.Yaw, 0);
 	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+
+	GetController()->SetControlRotation(FRotationMatrix::MakeFromX(Direction).Rotator());
 	LaunchCharacter(Direction * 2000.f, true, true);
 	anim->PlayPlayerMontage(DashMontage);
+	Combo->AttackReset();
+
 }
 UPlayerCharacterAnim* APlayerCharacter::GetCharacterAnim()
 {
@@ -246,8 +239,14 @@ void APlayerCharacter::DashCoolTimer()
 	{
 		DashCount++;
 		DashCoolTime = 10;
-		if(DashCount==2)
+		if (DashCount == 2)
 			GetWorldTimerManager().ClearTimer(DashCoolTimerHandle);;
+	}
+	else if (DashCoolTime < 9)
+	{
+		IsDashing = false;
+		GetCharacterMovement()->BrakingFrictionFactor = 2.f;
+		SetCanBeDamaged(true);
 	}
 }
 void APlayerCharacter::KillPlayer()

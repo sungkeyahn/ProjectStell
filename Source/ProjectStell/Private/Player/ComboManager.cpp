@@ -12,7 +12,6 @@ void UComboManager::InitComboManager()
 	character->GetCharacterAnim()->OnAttackHitCheck.AddUObject(this, &UComboManager::AttackCheck); 
 	character->GetCharacterAnim()->OnAttackEndCheck.AddUObject(this, &UComboManager::AttackEnd);
 	character->GetCharacterAnim()->OnAttackTimeCheck.AddUObject(this, &UComboManager::ConnectAttack);
-	//character->GetCharacterAnim()->OnMontageEnded.AddDynamic(this, &UComboManager::AttackEnd);
 }
 void UComboManager::Attack(bool isLeftClick)
 {
@@ -27,19 +26,19 @@ void UComboManager::Attack(bool isLeftClick)
 	if (result)
 	{
 		bool result2;
-		if (isLeftClick)
-			result2 = FindAttackInfo(LeftWeapon, RightWeapon);
-		else
-			result2 = FindAttackInfo(RightWeapon, LeftWeapon);
+		if (isLeftClick) result2 = FindAttackInfo(LeftWeapon, RightWeapon);
+		else result2 = FindAttackInfo(RightWeapon, LeftWeapon);
 		if (result2) //캔슬 부분 코드 개편 필요
 		{
 			CanNextAttack = false;
 			anim->SetMirror(isLeftClick);
 			if (PreAttackInfo.isCancelAble) //캔슬은 1타 이전에는 사용불가능 하기 때문에 1타용 로직이 필요
+			{
 				anim->PlayPlayerMontage(CurrentAttackInfo.montage, CurrentAttackInfo.PlaySpeed);
+				PreAttackInfo = CurrentAttackInfo;
+			}
 			else
-				anim->SetNextAttack(CurrentAttackInfo.montage, CurrentAttackInfo.PlaySpeed);
-			PreAttackInfo = CurrentAttackInfo;
+				NextAttackInfo = CurrentAttackInfo;
 		}
 	}
 }
@@ -61,9 +60,22 @@ void UComboManager::ConnectAttack()
 {
 	CanNextAttack = true;
 }
-void UComboManager::AttackEnd() //공격 종료 같은 부분은 델리게이트로 처리
+void UComboManager::AttackEnd()
 {
-	IsAttacking = false;
+	if (NextAttackInfo.montage != nullptr) //다음 공격이 존재 하는 경우
+	{
+		UPlayerCharacterAnim* anim = character->GetCharacterAnim();
+		if (anim == nullptr) return;
+		CurrentAttackInfo = NextAttackInfo;
+		anim->PlayPlayerMontage(CurrentAttackInfo.montage, CurrentAttackInfo.PlaySpeed);
+		PreAttackInfo = CurrentAttackInfo;
+		NextAttackInfo = FAttackInfoStruct();
+	}
+	else //공격 종료
+	{
+		IsAttacking = false;
+		PreAttackInfo = FAttackInfoStruct();
+	}
 }
 bool UComboManager::FindAttackInfo(AWeapon* clickWeapon, AWeapon* otherWeapon)
 {
@@ -74,7 +86,7 @@ bool UComboManager::FindAttackInfo(AWeapon* clickWeapon, AWeapon* otherWeapon)
 	if (!combolist.IsValidIndex(CurrentCombo)) return false;
 
 	Attackindex = combolist[CurrentCombo];
-	if (attacklist.IsValidIndex(Attackindex))
+	if (attacklist.IsValidIndex(Attackindex) && 0<=Attackindex)
 	{
 		CurrentAttackInfo = attacklist[Attackindex];
 		CurrentCombo += 1;
@@ -98,7 +110,7 @@ void UComboManager::AttackCheck()
 		ECollisionChannel::ECC_GameTraceChannel2,
 		FCollisionShape::MakeSphere(CurrentAttackInfo.AttackRadius),
 		params);
-	/*
+/*
 #ifdef ENABLE_DRAW_DEBUG
 	FVector traceVec = character->GetActorForwardVector() * CurrentAttackInfo.AttackRange;
 	FVector center = character->GetActorLocation() + traceVec * 0.5f;
@@ -107,23 +119,30 @@ void UComboManager::AttackCheck()
 	FColor drawColor = bResult ? FColor::Green : FColor::Red;
 	float debugLifeTime = 5.0f;
 	DrawDebugCapsule(GetWorld(), center, halfheight, CurrentAttackInfo.AttackRadius, capsuleRot, drawColor, false, debugLifeTime);
-#endif*/
-
+#endif
+*/
 	if (bResult)
 	{
 		for (auto hitResult : hitResults)
 		{
 			if (hitResult.GetActor())
 			{
-				FDamageEvent DamageEvent;
-				//데미지 결정
+				FDamageEvent DamageEvent;//데미지 결정
 				float LastDamage = CurrentAttackInfo.Damage;
-
 				auto other = Cast<AActor>(hitResult.GetActor());
 				UGameplayStatics::ApplyDamage(other, LastDamage, character->GetController(), nullptr, NULL);
 			}
 		}
 	}
 }
+void UComboManager::AttackReset()
+{
+	 PreAttackInfo = FAttackInfoStruct();
+	 CurrentAttackInfo = PreAttackInfo;
+	 NextAttackInfo = PreAttackInfo;
+	 IsAttacking = false;
+	 CanNextAttack = false;
+}
+
 
 
