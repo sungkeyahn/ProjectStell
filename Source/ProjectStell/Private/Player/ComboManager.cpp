@@ -28,11 +28,11 @@ void UComboManager::Attack(bool isLeftClick)
 		bool result2;
 		if (isLeftClick) result2 = FindAttackInfo(LeftWeapon, RightWeapon);
 		else result2 = FindAttackInfo(RightWeapon, LeftWeapon);
-		if (result2) //캔슬 부분 코드 개편 필요
+		if (result2)
 		{
 			CanNextAttack = false;
 			anim->SetMirror(isLeftClick);
-			if (PreAttackInfo.isCancelAble) //캔슬은 1타 이전에는 사용불가능 하기 때문에 1타용 로직이 필요
+			if (PreAttackInfo.isCancelAble)
 			{
 				anim->PlayPlayerMontage(CurrentAttackInfo.montage, CurrentAttackInfo.PlaySpeed);
 				PreAttackInfo = CurrentAttackInfo;
@@ -40,6 +40,8 @@ void UComboManager::Attack(bool isLeftClick)
 			else
 				NextAttackInfo = CurrentAttackInfo;
 		}
+		else
+			AttackReset();
 	}
 }
 bool UComboManager::InputCheck()

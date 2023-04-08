@@ -39,6 +39,5 @@ public:
 
 	bool FindAttackInfo(class AWeapon* clickWeapon, class AWeapon* otherWeapon);
 	void AttackCheck();
-
-	void AttackReset(); //외부 동작으로 공격이 캔슬되는경우 공격을 리셋
+	void AttackReset(); //공격 리셋
 };

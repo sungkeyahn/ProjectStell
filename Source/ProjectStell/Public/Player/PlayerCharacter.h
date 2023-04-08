@@ -28,7 +28,6 @@ private:
 	void LeftAttack();
 	void RightAttack();
 	void Evasion();
-
 //애니메이션 관련
 private:
 	UPROPERTY()
@@ -49,7 +48,7 @@ protected:
 	float armLengthTo = 0.0f;
 	float armLengthSpeed = 3.0f;
 	float armRotationSpeed = 10.0f;
-	void SetViewMode();
+	void DefaultViewSetting();
 //피격 관련
 public:
 	virtual float TakeDamage(float DamageAmout,
@@ -62,7 +61,6 @@ private:
 public:
 	class AWeapon* GetLeftWeapon();
 	class AWeapon* GetRightWeapon();
-
 	UFUNCTION(BlueprintCallable)
 		void PutOnWeapon(FName path = "", int hand = 0);
 //콤보 관련	

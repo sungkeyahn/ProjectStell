@@ -40,8 +40,7 @@ APlayerCharacter::APlayerCharacter()
 	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBP(TEXT("AnimBlueprint'/Game/1_Animation/ABP/PlayerABP.PlayerABP_C'"));
 	if (AnimBP.Succeeded())
 		GetMesh()->SetAnimInstanceClass(AnimBP.Class);
-
-	SetViewMode();
+	DefaultViewSetting();
 }
 void APlayerCharacter::BeginPlay()
 {
@@ -106,9 +105,9 @@ void APlayerCharacter::PostInitializeComponents()
 	}
 	);
 	//Stat->OnHpChanged.AddLambda();
-
 	Combo->InitComboManager();
 }
+
 void APlayerCharacter::UpDown(float NewAxisValue)
 {
 	directionToMove.X = NewAxisValue;
@@ -162,18 +161,26 @@ void APlayerCharacter::Evasion()
 		Rotation = FRotator(0, 135, 0);
 	const FRotator YawRotation(0, Rotation.Yaw, 0);
 	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-
 	GetController()->SetControlRotation(FRotationMatrix::MakeFromX(Direction).Rotator());
 	LaunchCharacter(Direction * 2000.f, true, true);
 	anim->PlayPlayerMontage(DashMontage);
 	Combo->AttackReset();
-
 }
+
 UPlayerCharacterAnim* APlayerCharacter::GetCharacterAnim()
 {
 	return anim;
 }
-void APlayerCharacter::SetViewMode()
+AWeapon* APlayerCharacter::GetLeftWeapon()
+{
+	return leftWeapon;
+}
+AWeapon* APlayerCharacter::GetRightWeapon()
+{
+	return rightWeapon;
+}
+
+void APlayerCharacter::DefaultViewSetting()
 {
 	armLengthTo = 400.0f;// == springArm->TargetArmLength = 800.0f;
 	armRotationTo = FRotator(-45.0f, 0.0f, 0.0f);// == springArm->SetRelativeRotation(FRotator(-45.0f,0.0f,0.0f));
@@ -193,41 +200,26 @@ float APlayerCharacter::TakeDamage(float DamageAmout, FDamageEvent const& Damage
 	Stat->SetDamage(FinalDamage);
 	return FinalDamage;
 }
-AWeapon* APlayerCharacter::GetLeftWeapon()
+void APlayerCharacter::PutOnWeapon(FName path, int hand) //매개 변수를 아이템으로 바꿀 예정
 {
-	return leftWeapon;
-}
-AWeapon* APlayerCharacter::GetRightWeapon()
-{
-	return rightWeapon;
-}
-void APlayerCharacter::PutOnWeapon(FName path, int hand)
-{
+	//rightWeapon = GetWorld()->SpawnActor<AWeapon>(AWeapon::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
+	//NULLWeapon
+	UClass* BP = Cast<UClass>(StaticLoadObject(UClass::StaticClass(), NULL, *path.ToString()));
 	if (hand == 0)
 	{
 		if (path.IsNone())
-		{
-			leftWeapon = GetWorld()->SpawnActor<AWeapon>(AWeapon::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
-		}
+			leftWeapon = GetWorld()->SpawnActor<AWeapon>();
 		else
-		{
-			UClass* BP = Cast<UClass>(StaticLoadObject(UClass::StaticClass(), NULL, *path.ToString()));
 			leftWeapon = GetWorld()->SpawnActor<AWeapon>(BP, FVector::ZeroVector, FRotator::ZeroRotator);
-		}
 		leftWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("hand_lSocket"));
 		leftWeapon->SetOwner(this);
 	}
-	else if (hand == 1)
+	else 
 	{
 		if (path.IsNone())
-		{
-			rightWeapon = GetWorld()->SpawnActor<AWeapon>(AWeapon::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
-		}
+			rightWeapon = GetWorld()->SpawnActor<AWeapon>();
 		else
-		{
-			UClass* BP = Cast<UClass>(StaticLoadObject(UClass::StaticClass(), NULL, *path.ToString()));
 			rightWeapon = GetWorld()->SpawnActor<AWeapon>(BP, FVector::ZeroVector, FRotator::ZeroRotator);
-		}
 		rightWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("hand_rSocket"));
 		rightWeapon->SetOwner(this);
 	}
@@ -249,24 +241,26 @@ void APlayerCharacter::DashCoolTimer()
 		SetCanBeDamaged(true);
 	}
 }
+void APlayerCharacter::CharacterDestroyTimer()
+{
+	++CharacterDstroyCoolTime;
+	if (CharacterDstroyCoolTime > 3.f)
+	{
+		//게임 저장과 사망 UI띄우고 게임 멈추기 기능 필요
+		GetWorldTimerManager().ClearTimer(CharacterDstroyTimerHandle);
+		auto ps = Cast<APlayerCharacterState>(GetPlayerState());
+		if (nullptr != ps) ps->AddDeadCount();
+		//아래 코드들은 한번만 실행해야함 타이머 코드 추가할 때 조심
+		leftWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		leftWeapon->Destroy();
+		leftWeapon = nullptr;
+		rightWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		rightWeapon->Destroy();
+		rightWeapon = nullptr;
+		SetActorHiddenInGame(true);
+	}
+}
 void APlayerCharacter::KillPlayer()
 {
 	Stat->SetDamage(100.f);
 }
-void APlayerCharacter::CharacterDestroyTimer()
-{
-	++CharacterDstroyCoolTime;
-	if (CharacterDstroyCoolTime > 5.f)
-	{
-		GetWorldTimerManager().ClearTimer(CharacterDstroyTimerHandle);
-		auto ps = Cast<APlayerCharacterState>(GetPlayerState());
-		if (nullptr != ps) ps->AddDeadCount();
-		//GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Red, FString::Printf(TEXT("%d"), ps->GetDeadCount()));
-		//게임 저장과 사망 UI띄우고 게임 멈추기 기능 필요
-	}
-	else if (CharacterDstroyCoolTime > 3.f)
-	{
-		SetActorHiddenInGame(true);
-	}
-}
- 
