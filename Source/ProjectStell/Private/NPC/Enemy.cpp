@@ -12,7 +12,7 @@ AEnemy::AEnemy()
 {
 	Stat = CreateDefaultSubobject<UStat>(TEXT("Stat"));
 
-	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBP(TEXT("AnimBlueprint'/Game/1_Animation/ABP/EnemyABP.EnemyABP_C'"));
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBP(TEXT("AnimBlueprint'/Game/1_Enemy/EnemyABP.EnemyABP_C'"));
 	if (AnimBP.Succeeded())
 		GetMesh()->SetAnimInstanceClass(AnimBP.Class);
 

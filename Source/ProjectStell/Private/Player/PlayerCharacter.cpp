@@ -34,10 +34,10 @@ APlayerCharacter::APlayerCharacter()
 	springArm->TargetArmLength = 400.0f;
 
 	//애셋 바인딩
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> Skin(TEXT("SkeletalMesh'/Game/Frank_RPG_Warrior/Skeletal_Meshes/SK_MannequinF.SK_MannequinF'"));
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> Skin(TEXT("SkeletalMesh'/Game/MercenaryWarrior/Meshes/SK_MercenaryWarrior_WithHelmet.SK_MercenaryWarrior_WithHelmet'"));
 	if (Skin.Succeeded())
 		GetMesh()->SetSkeletalMesh(Skin.Object);
-	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBP(TEXT("AnimBlueprint'/Game/1_Animation/ABP/PlayerABP.PlayerABP_C'"));
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBP(TEXT("AnimBlueprint'/Game/1_Player/Character/PlayerABP.PlayerABP_C'"));
 	if (AnimBP.Succeeded())
 		GetMesh()->SetAnimInstanceClass(AnimBP.Class);
 	DefaultViewSetting();
