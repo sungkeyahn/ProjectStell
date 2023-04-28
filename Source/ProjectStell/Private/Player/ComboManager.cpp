@@ -13,6 +13,10 @@ void UComboManager::InitComboManager()
 	character->GetCharacterAnim()->OnAttackEndCheck.AddUObject(this, &UComboManager::AttackEnd);
 	character->GetCharacterAnim()->OnAttackTimeCheck.AddUObject(this, &UComboManager::ConnectAttack);
 }
+FAttackInfoStruct UComboManager::GetCurAttackInfo()
+{
+	return CurrentAttackInfo;
+}
 void UComboManager::Attack(bool isLeftClick)
 {
 	UPlayerCharacterAnim* anim = character->GetCharacterAnim();
@@ -132,7 +136,7 @@ void UComboManager::AttackCheck()
 				FDamageEvent DamageEvent;//데미지 결정
 				float LastDamage = CurrentAttackInfo.Damage;
 				auto other = Cast<AActor>(hitResult.GetActor());
-				UGameplayStatics::ApplyDamage(other, LastDamage, character->GetController(), nullptr, NULL);
+				UGameplayStatics::ApplyDamage(other, LastDamage, character->GetController(), character, NULL);
 			}
 		}
 	}

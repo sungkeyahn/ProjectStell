@@ -23,6 +23,10 @@ public:
 		float AttackRadius = 0.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool isCancelAble = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		EHitEffectType HitType = EHitEffectType::Stiff;
+	UPROPERTY(EditAnywhere, Category = Camera)
+		TSubclassOf<UCameraShakeBase> CameraShakeType;
 };
 USTRUCT(Atomic, BlueprintType)
 struct FComboInfoStruct

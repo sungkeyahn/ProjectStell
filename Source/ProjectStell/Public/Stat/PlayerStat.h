@@ -6,6 +6,7 @@
 #include "Stat/Stat.h"
 #include "PlayerStat.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnSpChangedDelegate);
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class PROJECTSTELL_API UPlayerStat : public UStat
 {
@@ -14,20 +15,19 @@ public:
 	UPlayerStat();
 protected:
 	virtual void InitializeComponent() override;
-	virtual void SetStat(float newStat)override;
-/*
+//디폴트 데이터 관련
 private:
-	struct FPlayerStatDataByLevel* CurPlayerStat = nullptr;
-	UPROPERTY(EditInstanceOnly, Category = Stat, Meta = (AllowPrivateAccess = true))
-		float CurSTR;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stat, Meta = (AllowPrivateAccess = true))
+		float MaxSp=100.f;
+protected:
 	UPROPERTY(Transient, VisibleInstanceOnly, Category = Stat, Meta = (AllowPrivateAccess = true))
-		float CurDEX;
-	UPROPERTY(Transient, VisibleInstanceOnly, Category = Stat, Meta = (AllowPrivateAccess = true))
-		float CurDEF;
-	UPROPERTY(Transient, VisibleInstanceOnly, Category = Stat, Meta = (AllowPrivateAccess = true))
-		float CurLUCK;
-	UPROPERTY(Transient, VisibleInstanceOnly, Category = Stat, Meta = (AllowPrivateAccess = true))
-		float CurMaxExp;
-*/
+		float CurrentSp = -1;
+//데이터 상호작용 관련
+private:
+	void SetSp(float newSp);
+public:
+	FOnSpChangedDelegate OnSpChanged;
+	void UseStamina(float NewStamina);
+	float GetSpRatio()const;
 
 };

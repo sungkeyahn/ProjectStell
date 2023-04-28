@@ -4,7 +4,10 @@
 
 #include "ProjectStell.h"
 #include "GameFramework/Character.h"
+#include "Object/Item.h"
 #include "PlayerCharacter.generated.h"
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnInventoryChangedDelegate, FItemInfoStruct);
 
 UCLASS()
 class PROJECTSTELL_API APlayerCharacter : public ACharacter
@@ -51,9 +54,7 @@ protected:
 	void DefaultViewSetting();
 //피격 관련
 public:
-	virtual float TakeDamage(float DamageAmout,
-		struct FDamageEvent const& DamageEvent,
-		class AController* EventInstigator, AActor* DamageCauser)override;
+	virtual float TakeDamage(float DamageAmout,struct FDamageEvent const& DamageEvent,class AController* EventInstigator, AActor* DamageCauser)override;
 //무기 관련 
 private:
 	class AWeapon* leftWeapon;
@@ -77,14 +78,29 @@ private:
 		bool IsDashing;
 	UPROPERTY(VisibleAnywhere, Category = Dash)
 		int32 DashCount = 2;
+
 	UPROPERTY(VisibleAnywhere,Category = Dash)
 		int32 DashCoolTime = 10;
 	FTimerHandle DashCoolTimerHandle;
 	void DashCoolTimer();
+
+
 //사망 관련
 private:
 	void KillPlayer();
 	FTimerHandle CharacterDstroyTimerHandle;
 	float CharacterDstroyCoolTime = 0;
 	void CharacterDestroyTimer();
+//아이템 관련
+private:
+	TMap<int32,FItemInfoStruct>Inventory;
+	void LoadInvenData(); //저장된 게임의 인벤 정보를 불러와 인벤을 초기화하는 함수
+	bool AddItem(FItemInfoStruct info); //인벤에 아이템을 추가하는 함수 -> 중복 아이템 검사, 수량만 증가되도록 
+public:
+	FOnInventoryChangedDelegate OnInventoryChanged;
+	FItemInfoStruct* GetItem(int32 ID); //인벤에 해당 아이템이 있는지 체크후 데이터에 접근
+	TMap<int32, FItemInfoStruct> GetInventory();
+	UFUNCTION(BlueprintCallable)
+		bool ItemAcquisition(FItemInfoStruct info); //인게임에서 아이템 액터에 닿았을 때 호출될 함수 ,현재 인벤 상태를 체크해서 먹을수 있으면 추가
+	//인벤에 대한 변경값이 생길경우에 대한 델리게이트 필요할듯?
 };

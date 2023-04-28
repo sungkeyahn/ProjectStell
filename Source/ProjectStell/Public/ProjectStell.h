@@ -14,3 +14,8 @@ enum class EWeaponType :uint8
 {
 	None=0, Sword, Hammer, Axe, Spear, Shield, Dagger
 };
+UENUM(BlueprintType)
+enum class EHitEffectType :uint8
+{
+	None = 0, Stiff,KnockBack,Airborne
+};

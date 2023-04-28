@@ -12,7 +12,7 @@ UStat::UStat()
 void UStat::InitializeComponent()
 {
 	Super::InitializeComponent();
-	SetStat(FStatStruct().MaxHp);
+	SetHp(MaxHp);
 }
 void UStat::SetHp(float newHp)
 {
@@ -26,20 +26,12 @@ void UStat::SetHp(float newHp)
 }
 void UStat::SetDamage(float NewDamage)
 {
-	SetHp(FMath::Clamp<float>(CurrentHp - NewDamage, 0.0f, 10));
+	SetHp(FMath::Clamp<float>(CurrentHp - NewDamage, 0.0f, MaxHp));
 }
 float UStat::GetHpRatio()const
 {
 	if (CurrentHp<=0.f) return 0.f;
-	return (CurrentHp / 10.f);
-}
-void UStat::SetStat(float newStat)
-{
-	/*
-	auto GameInst = Cast<UStell>(UGameplayStatics::GetGameInstance((GetWorld())));
-	if (GameInst == nullptr) return;
-	CurHp = GameInst->GetDataTableRow(newStat);*/
-	SetHp(newStat);
+	return (CurrentHp / MaxHp);
 }
 
 

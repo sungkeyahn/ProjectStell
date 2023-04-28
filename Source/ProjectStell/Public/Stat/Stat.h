@@ -5,36 +5,31 @@
 #include "Components/ActorComponent.h"
 #include "Stat.generated.h"
 
-USTRUCT(Atomic, BlueprintType)
-struct FStatStruct
-{
-	GENERATED_BODY()
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		float MaxHp = 10;
-};
-
 DECLARE_MULTICAST_DELEGATE(FOnHpIsZeroDelegate);
 DECLARE_MULTICAST_DELEGATE(FOnHpChangedDelegate);
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTSTELL_API UStat : public UActorComponent
 {
 	GENERATED_BODY()
-//초기화
+//초기화 관련
 public:
 	UStat();
 protected:
 	virtual void InitializeComponent() override;
-	virtual void SetStat(float newStat);
-//변수 관련
+//디폴트 데이터 관련 
+private:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stat, Meta = (AllowPrivateAccess = true))
+		float MaxHp = 10;
+//현제 데이터 관련
 protected:
 	UPROPERTY(Transient, VisibleInstanceOnly, Category = Stat, Meta = (AllowPrivateAccess = true))
 		float CurrentHp = -1;
-//기능 관련
+//데이터 상호작용 관련
+private:
+	void SetHp(float newHp);
 public:
 	FOnHpIsZeroDelegate OnHpIsZero;
 	FOnHpChangedDelegate OnHpChanged;
-	void SetHp(float newHp);
 	void SetDamage(float NewDamage);
 	float GetHpRatio()const;
 };

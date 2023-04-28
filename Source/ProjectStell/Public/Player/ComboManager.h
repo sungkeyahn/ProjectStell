@@ -23,6 +23,7 @@ private:
 	FAttackInfoStruct CurrentAttackInfo;
 	FAttackInfoStruct NextAttackInfo;
 public:
+	FAttackInfoStruct GetCurAttackInfo();
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Combo, Meta = (AllowPrivateAccess = true))
 		bool IsAttacking;
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Combo, Meta = (AllowPrivateAccess = true))

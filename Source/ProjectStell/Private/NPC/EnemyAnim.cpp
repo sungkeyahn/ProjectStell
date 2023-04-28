@@ -34,4 +34,8 @@ void UEnemyAnim::AnimNotify_AttackHitCheck()
 {
 	OnAttackHitCheck.Broadcast();
 }
+void UEnemyAnim::AnimNotify_HitEndCheck()
+{
+	OnHitEndCheck.Broadcast();
+}
 

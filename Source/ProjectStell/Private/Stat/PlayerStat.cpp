@@ -12,25 +12,21 @@ UPlayerStat::UPlayerStat()
 void UPlayerStat::InitializeComponent()
 {
 	Super::InitializeComponent();
+	SetSp(MaxSp);
 }
-void UPlayerStat::SetStat(float newStat)
+void UPlayerStat::SetSp(float newSp)
 {
-	Super::SetStat(newStat);
+	CurrentSp = newSp;
+	OnSpChanged.Broadcast();
+	if (CurrentSp < KINDA_SMALL_NUMBER)
+		CurrentSp = 0.f;
 }
-/*
-void UPlayerStat::SetLevel(int32 newLevel)
+void UPlayerStat::UseStamina(float NewStamina)
 {
-	Super::SetLevel(newLevel);
-	auto GameInst = Cast<UStell>(UGameplayStatics::GetGameInstance((GetWorld())));
-	if (GameInst == nullptr) return;
-	CurPlayerStat = GameInst->GetPlayerStatDataTableRow(newLevel);
-	if (CurPlayerStat != nullptr)
-	{
-		CurSTR = CurPlayerStat->STR;
-		CurDEX = CurPlayerStat->DEX;
-		CurDEF = CurPlayerStat->DEF;
-		CurLUCK = CurPlayerStat->LUCK;
-		CurMaxExp = CurPlayerStat->MaxExp;
-	}
-}*/
-
+	SetSp(FMath::Clamp<float>(CurrentSp - NewStamina, 0.0f, MaxSp));
+}
+float UPlayerStat::GetSpRatio() const
+{
+	if (CurrentSp <= 0.f) return 0.f;
+	return (CurrentSp / MaxSp);
+}

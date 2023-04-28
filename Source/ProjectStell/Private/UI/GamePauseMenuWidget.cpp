@@ -28,7 +28,7 @@ void UGamePauseMenuWidget::OnResumeClicked()
 	if(nullptr == playerctrl)return;
 
 	RemoveFromParent();
-	playerctrl->ChangeInputMode(true);
+	playerctrl->ChangeInputMode(0);
 	playerctrl->SetPause(false);
 }
 void UGamePauseMenuWidget::OnReturnToTitleClicked()

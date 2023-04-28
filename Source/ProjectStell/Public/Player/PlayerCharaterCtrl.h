@@ -21,24 +21,39 @@ protected:
 private:
 	FInputModeGameOnly GameInputMode;
 	FInputModeUIOnly UIInputMode;
+	FInputModeGameAndUI GameAndUIInputMode;
 public:
-	void ChangeInputMode(bool bGameMode = true);
+	void ChangeInputMode(int32 bGameMode = 0);
 
-//게임제어 기능 관련
+//인 게임UI 관련
 private:
 	UPROPERTY()
 		class UGamePauseMenuWidget* MenuWidget;
-	//클리어시 보여줄 데이터가 확정되지 않아 일단 일시정지 클리스로 구현 
-	//사망시 UI도 제작 해야 함
 	UPROPERTY()
 		class UGameClearMenuWidget* ClearWidget;
-	void GamePause();//UI띄어주는 역할
-public:
-	void GameClear();//UI띄어주는 역할
+	UPROPERTY()
+		class UCharacterHUDWidget* HUDWidget;
+	UPROPERTY()
+		class UInventoryWidget* InventoryWidget;
+	UPROPERTY()
+		class UItemSlotWidget* ItemSlotWidget;
+	bool isInvenopen=false;
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Ui)
 		TSubclassOf<class UGamePauseMenuWidget>MenuWidgetClass;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Ui)
 		TSubclassOf<class UGameClearMenuWidget>ClearWidgetClass;
-	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Ui)
+		TSubclassOf<class UInventoryWidget>InventoryWidgetClass;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Ui)
+		TSubclassOf<class UItemSlotWidget> ItemSlotWidgetClass;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Ui)
+		TSubclassOf<class UCharacterHUDWidget>HUDWidgetClass;
+public:
+	void GamePause();//UI띄어주는 역할
+	void GameClear();
+	void ShowInventoryUI();
+	class UCharacterHUDWidget* GetHUDWidget() const;
+	class UInventoryWidget* GetInventoryWidget() const;
+	class UItemSlotWidget* GetItemSlotWidget() const;
 };

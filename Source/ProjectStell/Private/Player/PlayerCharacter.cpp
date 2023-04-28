@@ -8,6 +8,8 @@
 #include "Stat/PlayerStat.h"
 #include "Player/ComboManager.h"
 #include "Player/PlayerCharacterState.h"
+#include "UI/CharacterHUDWidget.h"
+#include "UI/InventoryWidget.h"
 #include "DrawDebugHelpers.h"
 
 APlayerCharacter::APlayerCharacter()
@@ -48,6 +50,8 @@ void APlayerCharacter::BeginPlay()
 	PlayerCtrl = Cast<APlayerCharaterCtrl>(GetController());
 	if (nullptr == PlayerCtrl)return;
 	//DisableInput(PlayerController);
+	PlayerCtrl->GetHUDWidget()->BindCharacterStat(Stat);
+	PlayerCtrl->GetInventoryWidget()->BindCharacterInventory(this);
 }
 void APlayerCharacter::Tick(float DeltaTime)
 {
@@ -104,7 +108,6 @@ void APlayerCharacter::PostInitializeComponents()
 	GetWorldTimerManager().SetTimer(CharacterDstroyTimerHandle, this, &APlayerCharacter::CharacterDestroyTimer, 1.0f, true);
 	}
 	);
-	//Stat->OnHpChanged.AddLambda();
 	Combo->InitComboManager();
 }
 
@@ -137,8 +140,8 @@ void APlayerCharacter::RightAttack()
 void APlayerCharacter::Evasion()
 {
 	//anim->IsAnyMontagePlaying()||
-	if (IsDashing|| DashCount <= 0) return;
-	--DashCount;
+	if (IsDashing || Stat->GetSpRatio() < 0.5f) return;
+	Stat->UseStamina(50);
 	GetWorldTimerManager().SetTimer(DashCoolTimerHandle, this, &APlayerCharacter::DashCoolTimer, 1.0f, true);
 	const int32 FB = directionToMove.X;
 	const int32 RL = directionToMove.Y;
@@ -161,8 +164,8 @@ void APlayerCharacter::Evasion()
 		Rotation = FRotator(0, 135, 0);
 	const FRotator YawRotation(0, Rotation.Yaw, 0);
 	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	GetController()->SetControlRotation(FRotationMatrix::MakeFromX(Direction).Rotator());
 	LaunchCharacter(Direction * 2000.f, true, true);
+	GetController()->SetControlRotation(FRotationMatrix::MakeFromX(Direction).Rotator());
 	anim->PlayPlayerMontage(DashMontage);
 	Combo->AttackReset();
 }
@@ -226,20 +229,13 @@ void APlayerCharacter::PutOnWeapon(FName path, int hand) //매개 변수를 아이템으�
 }
 void APlayerCharacter::DashCoolTimer()
 {
-	--DashCoolTime;
-	if (DashCoolTime < 1)
-	{
-		DashCount++;
-		DashCoolTime = 10;
-		if (DashCount == 2)
-			GetWorldTimerManager().ClearTimer(DashCoolTimerHandle);;
-	}
-	else if (DashCoolTime < 9)
-	{
-		IsDashing = false;
-		GetCharacterMovement()->BrakingFrictionFactor = 2.f;
-		SetCanBeDamaged(true);
-	}
+	if (Stat->GetSpRatio() >= 1.0f)
+		GetWorldTimerManager().ClearTimer(DashCoolTimerHandle);
+
+	Stat->UseStamina(-5);
+	IsDashing = false;
+	GetCharacterMovement()->BrakingFrictionFactor = 2.f;
+	SetCanBeDamaged(true);
 }
 void APlayerCharacter::CharacterDestroyTimer()
 {
@@ -259,6 +255,46 @@ void APlayerCharacter::CharacterDestroyTimer()
 		rightWeapon = nullptr;
 		SetActorHiddenInGame(true);
 	}
+}
+void APlayerCharacter::LoadInvenData()
+{
+}
+bool APlayerCharacter::AddItem(FItemInfoStruct info)
+{//이 함수에서는 인벤이 아이템을 습득 가능한 상태인지를 검사
+	bool result =true;
+	if (Inventory.Find(info.ID))
+	{
+		Inventory.Find(info.ID)->Quantity += info.Quantity;
+		OnInventoryChanged.Broadcast(info);
+	}
+	else if (info.ID > 0)
+	{
+		Inventory.Add(info.ID, info);
+		OnInventoryChanged.Broadcast(info);
+	}
+	else
+		result = false;
+
+	/*여기서 인벤UI에 현재 먹은 아이템의 정보를 넣는 작업이 필요
+	* 컨트롤러의 인벤 UI를 건들여서 UPdateInvenUI()를 실행시키는 형식으로 구성*/
+	
+	
+	
+	GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Red, FString::Printf(TEXT("Add Item %d"), Inventory.Find(info.ID)->Quantity));
+	return result;
+}
+FItemInfoStruct* APlayerCharacter::GetItem(int32 ID)
+{
+	return Inventory.Find(ID);
+}
+TMap<int32, FItemInfoStruct> APlayerCharacter::GetInventory()
+{
+	return Inventory;
+}
+bool APlayerCharacter::ItemAcquisition(FItemInfoStruct info)
+{//이 함수에서는 정상적으로 월드에 존재하는 아이템 인지를 검사
+	if (AddItem(info)) return true;
+	else return false;
 }
 void APlayerCharacter::KillPlayer()
 {

@@ -7,12 +7,12 @@
 #include "EnemyAnim.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnAttackHitCheckDeletegate);
-DECLARE_DELEGATE_RetVal_OneParam(bool, FOnMontageFeasibleCheckDeletegate, UAnimMontage* montage);
+DECLARE_MULTICAST_DELEGATE(FOnHitEndCheckDeletegate);
 UCLASS()
 class PROJECTSTELL_API UEnemyAnim : public UAnimInstance
 {
 	GENERATED_BODY()
-		//초기화 
+//초기화 
 public:
 	UEnemyAnim();
 	virtual void NativeUpdateAnimation(float DeltaSeconds)override;
@@ -23,11 +23,14 @@ public:
 	//공격 피격 관련
 public:
 	FOnAttackHitCheckDeletegate OnAttackHitCheck;
+	FOnHitEndCheckDeletegate OnHitEndCheck;
 private:
 	UFUNCTION()
 		void AnimNotify_AttackHitCheck();
+	UFUNCTION()
+		void AnimNotify_HitEndCheck();
 
-	//상태 관련
+//상태 관련
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Pawn, Meta = (AllowPrivateAccess = true))
 		float CurrentPawnSpeed;
