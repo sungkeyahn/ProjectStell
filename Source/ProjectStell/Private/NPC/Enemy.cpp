@@ -11,11 +11,11 @@
 AEnemy::AEnemy()
 {
 	Stat = CreateDefaultSubobject<UStat>(TEXT("Stat"));
-
+	/*
 	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBP(TEXT("AnimBlueprint'/Game/1_Enemy/EnemyABP.EnemyABP_C'"));
 	if (AnimBP.Succeeded())
 		GetMesh()->SetAnimInstanceClass(AnimBP.Class);
-
+	*/
 	PrimaryActorTick.bCanEverTick = true;
 	GetCapsuleComponent()->SetCapsuleHalfHeight(88.0f);
 	GetCapsuleComponent()->SetCapsuleRadius(34.0f);

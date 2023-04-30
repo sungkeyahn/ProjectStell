@@ -203,28 +203,41 @@ float APlayerCharacter::TakeDamage(float DamageAmout, FDamageEvent const& Damage
 	Stat->SetDamage(FinalDamage);
 	return FinalDamage;
 }
-void APlayerCharacter::PutOnWeapon(FName path, int hand) //매개 변수를 아이템으로 바꿀 예정
+void APlayerCharacter::PutOnWeapon(AWeapon* newWeapon, int hand) //매개 변수를 아이템으로 바꿀 예정
 {
-	//rightWeapon = GetWorld()->SpawnActor<AWeapon>(AWeapon::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator);
-	//NULLWeapon
-	UClass* BP = Cast<UClass>(StaticLoadObject(UClass::StaticClass(), NULL, *path.ToString()));
-	if (hand == 0)
-	{
+	if (newWeapon == nullptr) return;
+	/*UClass* BP = Cast<UClass>(StaticLoadObject(UClass::StaticClass(), NULL, *path.ToString()));
+	
 		if (path.IsNone())
 			leftWeapon = GetWorld()->SpawnActor<AWeapon>();
 		else
 			leftWeapon = GetWorld()->SpawnActor<AWeapon>(BP, FVector::ZeroVector, FRotator::ZeroRotator);
 		leftWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("hand_lSocket"));
 		leftWeapon->SetOwner(this);
+	*/
+	if (hand == 0)
+	{
+		if (leftWeapon != nullptr)
+		{
+			leftWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+			leftWeapon->Destroy();
+			leftWeapon = nullptr;
+		}
+		newWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("hand_lSocket"));
+		newWeapon->SetOwner(this);
+		leftWeapon = newWeapon;
 	}
 	else 
 	{
-		if (path.IsNone())
-			rightWeapon = GetWorld()->SpawnActor<AWeapon>();
-		else
-			rightWeapon = GetWorld()->SpawnActor<AWeapon>(BP, FVector::ZeroVector, FRotator::ZeroRotator);
-		rightWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("hand_rSocket"));
-		rightWeapon->SetOwner(this);
+		if (rightWeapon != nullptr)
+		{
+			rightWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+			rightWeapon->Destroy();
+			rightWeapon = nullptr;
+		}
+		newWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("hand_rSocket"));
+		newWeapon->SetOwner(this);
+		rightWeapon = newWeapon;
 	}
 }
 void APlayerCharacter::DashCoolTimer()
@@ -292,9 +305,22 @@ TMap<int32, FItemInfoStruct> APlayerCharacter::GetInventory()
 	return Inventory;
 }
 bool APlayerCharacter::ItemAcquisition(FItemInfoStruct info)
-{//이 함수에서는 정상적으로 월드에 존재하는 아이템 인지를 검사
+{	
+	/*이 함수에서는 정상적으로 월드에 존재하는 아이템 인지를 검사
 	if (AddItem(info)) return true;
-	else return false;
+	else return false;*/
+	if (info.Type== EItemType::Weapon)
+	{
+		auto NewWeapon = GetWorld()->SpawnActor<AWeapon>(info.ItemClass, FVector::ZeroVector, FRotator::ZeroRotator);
+		if (leftWeapon == nullptr && rightWeapon == nullptr)
+			PutOnWeapon(NewWeapon, 0);
+		else if (leftWeapon != nullptr && rightWeapon == nullptr)
+			PutOnWeapon(NewWeapon, 1);
+		else if (leftWeapon != nullptr && rightWeapon != nullptr)
+			PutOnWeapon(NewWeapon, 0);
+	}
+	return true;
+
 }
 void APlayerCharacter::KillPlayer()
 {

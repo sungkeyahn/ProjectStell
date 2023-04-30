@@ -17,7 +17,7 @@ AProjectStellGameModeBase::AProjectStellGameModeBase()
 	PlayerControllerClass = APlayerCharaterCtrl::StaticClass();
 	PlayerStateClass = APlayerCharacterState::StaticClass();
 	GameStateClass = AStellGameStateBase::StaticClass();
-	StageClearScore = 1;
+	StageClearScore = 100;
 }
 void AProjectStellGameModeBase::PostInitializeComponents()
 {

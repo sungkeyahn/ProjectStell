@@ -63,7 +63,7 @@ public:
 	class AWeapon* GetLeftWeapon();
 	class AWeapon* GetRightWeapon();
 	UFUNCTION(BlueprintCallable)
-		void PutOnWeapon(FName path = "", int hand = 0);
+		void PutOnWeapon(class AWeapon* newWeapon, int hand=0);
 //ÄÞº¸ °ü·Ã	
 	UPROPERTY(VisibleAnywhere, Category = Combo)
 		class UComboManager* Combo;
@@ -78,7 +78,6 @@ private:
 		bool IsDashing;
 	UPROPERTY(VisibleAnywhere, Category = Dash)
 		int32 DashCount = 2;
-
 	UPROPERTY(VisibleAnywhere,Category = Dash)
 		int32 DashCoolTime = 10;
 	FTimerHandle DashCoolTimerHandle;

@@ -20,6 +20,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemInfo)
 		int32 ID = -1;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemInfo)
+		TSubclassOf<class AActor> ItemClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemInfo)
 		FString Name;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemInfo)
 		EItemType Type = EItemType::None;
@@ -27,6 +29,7 @@ public:
 		int32 Quantity = 1;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemInfo)
 		UTexture2D* Icon = nullptr;
+
 };
 
 UCLASS()
