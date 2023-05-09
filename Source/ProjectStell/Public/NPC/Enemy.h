@@ -85,12 +85,14 @@ private:
 		class UAnimMontage* HitMontage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Hit, Meta = (AllowPrivateAccess = true))
 		float stiffTime=0.5f;
+	FTimerHandle GroggyTimerHandle;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Hit, Meta = (AllowPrivateAccess = true))
 		float groggyTime = 3.5f;;
-	FTimerHandle GroggyTimerHandle;
-	void HitAffter();
+	FAttackInfoStruct takeAttackInfo;
+
 public:
-	void HitEffect(FAttackInfoStruct info);
+	UFUNCTION()
+		void HitEffect();
 //»ç¸Á °ü·Ã
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = State, Meta = (AllowPrivateAccess = true))

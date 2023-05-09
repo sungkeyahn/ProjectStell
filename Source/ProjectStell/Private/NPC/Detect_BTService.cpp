@@ -27,8 +27,7 @@ void UDetect_BTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 	bool bResult = World->OverlapMultiByChannel(
 		OverlapResults,Center,FQuat::Identity,
 		ECollisionChannel::ECC_GameTraceChannel1,FCollisionShape::MakeSphere(DetectRadius),
-		CollisionQueryParam
-	);
+		CollisionQueryParam);
 
 	if (bResult)
 	{
@@ -37,6 +36,10 @@ void UDetect_BTService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeM
 			APlayerCharacter* p = Cast<APlayerCharacter>(OverlapResult.GetActor());
 			if (p && p->GetController()->IsPlayerController())
 			{
+				//플레이어를 처음 인지하면 일어나는 행위는 스켈레톤 잡몹만 해당하는 기능이다. 
+				//설정하기 위하여 블랙보드에 키를 쓰는 방식이 맞는듯?
+				//콜백 함수?
+				//AEnemy* monster = Cast<AEnemy>(ControllingPawn)->DeadTime;
 				OwnerComp.GetBlackboardComponent()->SetValueAsObject(AEnemyCtrl::TargetActorKey, p);
 
 				DrawDebugSphere(World, Center, DetectRadius, 16, FColor::Green, false, 0.2f);

@@ -11,11 +11,6 @@
 AEnemy::AEnemy()
 {
 	Stat = CreateDefaultSubobject<UStat>(TEXT("Stat"));
-	/*
-	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimBP(TEXT("AnimBlueprint'/Game/1_Enemy/EnemyABP.EnemyABP_C'"));
-	if (AnimBP.Succeeded())
-		GetMesh()->SetAnimInstanceClass(AnimBP.Class);
-	*/
 	PrimaryActorTick.bCanEverTick = true;
 	GetCapsuleComponent()->SetCapsuleHalfHeight(88.0f);
 	GetCapsuleComponent()->SetCapsuleRadius(34.0f);
@@ -48,35 +43,29 @@ void AEnemy::PostInitializeComponents()
 	anim = Cast<UEnemyAnim>(GetMesh()->GetAnimInstance());
 	if (nullptr == anim) return;
 	anim->OnMontageEnded.AddDynamic(this, &AEnemy::OnAttackMontageEnded);
-	anim->OnHitEndCheck.AddUObject(this, &AEnemy::HitAffter);
+	anim->OnHitEndCheck.AddLambda([this]()->void {EnemyCtrl->RunBT();});
 	anim->OnAttackHitCheck.AddUObject(this, &AEnemy::AttackCheck);
 	Stat->OnHpIsZero.AddLambda([this]()->void {SetInGameState(EEnemyStateInGame::Dead); });
-	//Stat->OnHpChanged.AddUObject(this, &AEnemy::Hit);
+	Stat->OnHpChanged.AddUObject(this, &AEnemy::HitEffect);
 	SetInGameState(EEnemyStateInGame::Loading);
 }
 float AEnemy::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	/*if (Combo->GetCurAttackInfo().HitType == EHitEffectType::Stiff)
-	PlayerCtrl->PlayerCameraManager.Get()->StartCameraShake(shake, 1.0f, ECameraShakePlaySpace::CameraLocal, FRotator(0, 0, 0));*/
-
 	float FinalDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
-	//공격정보
-	FAttackInfoStruct attackinfo = Cast<APlayerCharacter>(DamageCauser)->Combo->GetCurAttackInfo();
+	//공격 정보
+	takeAttackInfo = Cast<APlayerCharacter>(DamageCauser)->Combo->GetCurAttackInfo();
 	//흔들림
-	if(attackinfo.CameraShakeType != nullptr)
-		Cast<APlayerCharaterCtrl>(EventInstigator)->PlayerCameraManager.Get()->StartCameraShake(attackinfo.CameraShakeType, 1.0f, ECameraShakePlaySpace::CameraLocal, FRotator(0, 0, 0));
-	SetMonsterState(EMonsterState::SuperArmor);
-	HitEffect(attackinfo);
-
-	//삭제될 코드들
-	/*
+	if(takeAttackInfo.CameraShakeType != nullptr)
+		Cast<APlayerCharaterCtrl>(EventInstigator)->PlayerCameraManager.Get()->StartCameraShake(takeAttackInfo.CameraShakeType, 1.0f, ECameraShakePlaySpace::CameraLocal, FRotator(0, 0, 0));
+	//데미지 적용
+	Stat->SetDamage(takeAttackInfo.Damage);
+	return FinalDamage;
+	/* 삭제될 코드들 SetMonsterState(EMonsterState::SuperArmor); <- 이 함수를 적절하게 사용하는것이 중요 
 	if (Stat->GetHpRatio() < 0.5f)
 		SetMonsterState(EMonsterState::SuperArmor);
 	else if (Stat->GetHpRatio() == 0.7f)
 		SetMonsterState(EMonsterState::Groggy);
-		*/
-
-	return FinalDamage;
+	*/
 }
 void AEnemy::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
@@ -137,7 +126,7 @@ void AEnemy::SetMonsterState(EMonsterState newState)
 {
 	if (CurrentMonsterState == newState)return;
 	CurrentMonsterState = newState;
-	switch (CurrentMonsterState) //각 상태로 진입할때 사용할 초기화 공간
+	switch (CurrentMonsterState) //각 상태로 진입할때 사용할 초기화
 	{
 	case EMonsterState::Idle:
 
@@ -154,7 +143,7 @@ void AEnemy::SetMonsterState(EMonsterState newState)
 			if (groggyTime==0.f)
 			{
 				GetWorldTimerManager().ClearTimer(GroggyTimerHandle);
-				HitAffter();
+				EnemyCtrl->RunBT();
 				SetMonsterState(EMonsterState::Idle);
 				groggyTime = 3.5f;
 			}
@@ -202,46 +191,37 @@ void AEnemy::AttackCheck()
 		}
 	}
 }
-void AEnemy::HitAffter() //현재는 노티파이로 체크하는 구조지만 일정 시간 동안 ai 무력화 기능으로 개편될듯
-{
-	EnemyCtrl->RunBT();
-}
-void AEnemy::HitEffect(FAttackInfoStruct info)
+void AEnemy::HitEffect()
 {
 	switch (CurrentMonsterState)
 	{
 	case EMonsterState::Idle:
 		EnemyCtrl->StopBT();
-		Stat->SetDamage(info.Damage);
 		anim->PlayEnemyMontage(HitMontage);
-		if (info.HitType== EHitEffectType::Stiff) //경직 실행
+		if (takeAttackInfo.HitType== EHitEffectType::Stiff) //경직 실행
 		{
 			const FVector Direction = FRotationMatrix(FRotator(0, GetActorRotation().Yaw, 0)).GetUnitAxis(EAxis::X);
 			LaunchCharacter(Direction * -500.f, true, true);
 			GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Red, FString::Printf(TEXT("Stiff")));
 		}
-		else if (info.HitType == EHitEffectType::KnockBack) //넉백 실행
+		else if (takeAttackInfo.HitType == EHitEffectType::KnockBack) //넉백 실행
 		{
 			const FVector Direction = FRotationMatrix(FRotator(0, GetActorRotation().Yaw, 0)).GetUnitAxis(EAxis::X);
 			LaunchCharacter(Direction * -1000.f, true, true);
 			GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Red, FString::Printf(TEXT("KnockBack")));
 		}
-		else if (info.HitType == EHitEffectType::Airborne) //에어본 실행
+		else if (takeAttackInfo.HitType == EHitEffectType::Airborne) //에어본 실행
 		{
 			Jump();
 			GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Red, FString::Printf(TEXT("Airborne")));
 		}
 		break;
 	case EMonsterState::SuperArmor:
-		Stat->SetDamage(info.Damage);
 		break;
 	case EMonsterState::Groggy:
-		Stat->SetDamage(info.Damage);
-		//그로기 몽타주를 루프로 실행
 		break;
 	default:
 		break;
 	}
-
 }
 
