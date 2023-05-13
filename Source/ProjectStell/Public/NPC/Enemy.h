@@ -25,7 +25,7 @@ public:
 UENUM(BlueprintType)
 enum class EMonsterState :uint8
 {
-	Idle, SuperArmor, Groggy
+	Idle, SuperArmor, Groggy , Invincibility
 };
 DECLARE_MULTICAST_DELEGATE(FOnAttackEndDelegate);
 
@@ -46,21 +46,24 @@ private:
 	UPROPERTY()
 		class AEnemyCtrl* EnemyCtrl;
 //스텟 관련
+protected:
 	UPROPERTY(VisibleAnywhere, Category = Stat)
 		class UStat* Stat;
+
 //애니메이션 관련
-private:
+protected:
 	UPROPERTY()
 		class UEnemyAnim* anim;
 	UFUNCTION()
 		void OnAttackMontageEnded(class UAnimMontage* Montage, bool bInterrupted);
 
 //게임상태, 몬스터 상태관련
-public:
+protected: 
 	UPROPERTY(Transient, VisibleInstanceOnly, BlueprintReadOnly, Category = GameState)
 		EEnemyStateInGame CurrentInGameState;
 	UPROPERTY(VisibleAnywhere, Category = State)
 		EMonsterState CurrentMonsterState = EMonsterState::Idle;
+public:
 	void SetInGameState(EEnemyStateInGame newState);
 	void SetMonsterState(EMonsterState newState);
 
@@ -75,20 +78,20 @@ private:
 		TArray<FMonsterAttackInfoStruct> AttackPatten;
 public:
 	FMonsterAttackInfoStruct CurrentAttackinfo;
-	void Attack(int32 infoIndex);
+	virtual void Attack(int32 infoIndex);
 	void AttackCheck();
 	FOnAttackEndDelegate OnAttackEnd;
 
 //피격 관련
-private:
+protected:
+	bool isHit = false;
+	FTimerHandle SternTimerHandle;
+	FAttackInfoStruct takeAttackInfo;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta = (AllowPrivateAccess = true))
 		class UAnimMontage* HitMontage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Hit, Meta = (AllowPrivateAccess = true))
-		float stiffTime=0.5f;
-	FTimerHandle GroggyTimerHandle;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Hit, Meta = (AllowPrivateAccess = true))
-		float groggyTime = 3.5f;;
-	FAttackInfoStruct takeAttackInfo;
+		float SternTime=0.0f;
+	void Stern(float sterntime);
 
 public:
 	UFUNCTION()

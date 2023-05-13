@@ -3,7 +3,8 @@
 #include "NPC/EnemyCtrl.h"
 #include "Stat/Stat.h"
 #include "ProjectStellGameModeBase.h"
-#include"DrawDebugHelpers.h"
+
+#include "DrawDebugHelpers.h"
 #include "Player/PlayerCharacter.h"
 #include "Player/PlayerCharaterCtrl.h"
 #include "Player/ComboManager.h"
@@ -43,7 +44,6 @@ void AEnemy::PostInitializeComponents()
 	anim = Cast<UEnemyAnim>(GetMesh()->GetAnimInstance());
 	if (nullptr == anim) return;
 	anim->OnMontageEnded.AddDynamic(this, &AEnemy::OnAttackMontageEnded);
-	anim->OnHitEndCheck.AddLambda([this]()->void {EnemyCtrl->RunBT();});
 	anim->OnAttackHitCheck.AddUObject(this, &AEnemy::AttackCheck);
 	Stat->OnHpIsZero.AddLambda([this]()->void {SetInGameState(EEnemyStateInGame::Dead); });
 	Stat->OnHpChanged.AddUObject(this, &AEnemy::HitEffect);
@@ -52,26 +52,27 @@ void AEnemy::PostInitializeComponents()
 float AEnemy::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	float FinalDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
-	//공격 정보
-	takeAttackInfo = Cast<APlayerCharacter>(DamageCauser)->Combo->GetCurAttackInfo();
-	//흔들림
-	if(takeAttackInfo.CameraShakeType != nullptr)
-		Cast<APlayerCharaterCtrl>(EventInstigator)->PlayerCameraManager.Get()->StartCameraShake(takeAttackInfo.CameraShakeType, 1.0f, ECameraShakePlaySpace::CameraLocal, FRotator(0, 0, 0));
-	//데미지 적용
-	Stat->SetDamage(takeAttackInfo.Damage);
+	if (!isHit)
+	{
+		isHit = true;
+		//공격 정보
+		takeAttackInfo = Cast<APlayerCharacter>(DamageCauser)->Combo->GetCurAttackInfo();
+		//흔들림
+		if (takeAttackInfo.CameraShakeType != nullptr)
+			Cast<APlayerCharaterCtrl>(EventInstigator)->PlayerCameraManager.Get()->StartCameraShake(takeAttackInfo.CameraShakeType, 1.0f, ECameraShakePlaySpace::CameraLocal, FRotator(0, 0, 0));
+		//데미지 적용
+		Stat->SetDamage(takeAttackInfo.Damage);
+	}
+
 	return FinalDamage;
-	/* 삭제될 코드들 SetMonsterState(EMonsterState::SuperArmor); <- 이 함수를 적절하게 사용하는것이 중요 
-	if (Stat->GetHpRatio() < 0.5f)
-		SetMonsterState(EMonsterState::SuperArmor);
-	else if (Stat->GetHpRatio() == 0.7f)
-		SetMonsterState(EMonsterState::Groggy);
-	*/
 }
 void AEnemy::OnAttackMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 {
-	if (!IsAttacking)return;
-	IsAttacking = false;
-	OnAttackEnd.Broadcast();
+	if (IsAttacking) 
+	{
+		IsAttacking = false;
+		OnAttackEnd.Broadcast();
+	}
 }
 void AEnemy::SetInGameState(EEnemyStateInGame newState)
 {
@@ -103,7 +104,7 @@ void AEnemy::SetInGameState(EEnemyStateInGame newState)
 			SetActorEnableCollision(false);
 			SetCanBeDamaged(false);
 			GetMesh()->SetHiddenInGame(false);
-			anim->SetDeadAnim();
+			anim->IsDead=true;
 			EnemyCtrl->StopBT();
 			GetWorld()->GetTimerManager().SetTimer(DeadTimerHandle, FTimerDelegate::CreateLambda([this]()->void
 			{ 	
@@ -120,38 +121,11 @@ void AEnemy::SetInGameState(EEnemyStateInGame newState)
 			break;
 		}
 	}
-
 }
 void AEnemy::SetMonsterState(EMonsterState newState)
 {
 	if (CurrentMonsterState == newState)return;
 	CurrentMonsterState = newState;
-	switch (CurrentMonsterState) //각 상태로 진입할때 사용할 초기화
-	{
-	case EMonsterState::Idle:
-
-		break;
-	case EMonsterState::SuperArmor:
-
-		break;
-	case EMonsterState::Groggy:
-		EnemyCtrl->StopBT();
-		anim->StopAllMontages(0.1f);
-		GetWorld()->GetTimerManager().SetTimer(GroggyTimerHandle, FTimerDelegate::CreateLambda([this]()->void
-		{
-			groggyTime -= 0.5f;
-			if (groggyTime==0.f)
-			{
-				GetWorldTimerManager().ClearTimer(GroggyTimerHandle);
-				EnemyCtrl->RunBT();
-				SetMonsterState(EMonsterState::Idle);
-				groggyTime = 3.5f;
-			}
-		 }), 0.5f, true);
-		break;
-	default:
-		break;
-	}
 }
 void AEnemy::Attack(int32 infoIndex)
 {
@@ -191,12 +165,29 @@ void AEnemy::AttackCheck()
 		}
 	}
 }
+void AEnemy::Stern(float sterntime) //이 함수에 시간을 넣으면 자동으로 그만큼 멈추고 실행시켜줌 
+{
+	SternTime = sterntime;
+	EnemyCtrl->StopBT();
+	if (isHit) //피격중에 또맞으면 타이머 초기화
+		GetWorldTimerManager().ClearTimer(SternTimerHandle);
+
+	GetWorld()->GetTimerManager().SetTimer(SternTimerHandle,FTimerDelegate::CreateLambda([this]()->void
+	{
+		SternTime -= 1.0f;
+	if (SternTime <= 0.f)
+	{
+		EnemyCtrl->RunBT();
+		isHit = false;
+		GetWorldTimerManager().ClearTimer(SternTimerHandle);
+	}}), 1.0f, true);
+}
 void AEnemy::HitEffect()
 {
 	switch (CurrentMonsterState)
 	{
 	case EMonsterState::Idle:
-		EnemyCtrl->StopBT();
+		Stern(1.0f);
 		anim->PlayEnemyMontage(HitMontage);
 		if (takeAttackInfo.HitType== EHitEffectType::Stiff) //경직 실행
 		{
@@ -219,8 +210,10 @@ void AEnemy::HitEffect()
 	case EMonsterState::SuperArmor:
 		break;
 	case EMonsterState::Groggy:
+		//Stern(3.5f); SetMonsterState(EMonsterState::Idle); 몬스터의 상태변화는 여기서 설정하는것이아님 
 		break;
 	default:
+		Stern(0.0f);
 		break;
 	}
 }

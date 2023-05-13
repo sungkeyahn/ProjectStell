@@ -47,10 +47,21 @@ protected:
 public:
 	UPROPERTY(VisibleAnywhere, Category = Weapon)
 		class USkeletalMeshComponent* mesh;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
+		FName LeftSocketName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
+		FName RightSocketName;
+	/*
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
+		 FVector loc;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
+		 FRotator rot;
+	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Attack)
 		TArray<FAttackInfoStruct> AttackInfo;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Attack)
 		TMap<EWeaponType, FComboInfoStruct> ComboList;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Attack)
 		EWeaponType Type = EWeaponType::None;
+
 };

@@ -6,9 +6,6 @@
 #include "AIController.h"
 #include "EnemyCtrl.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class PROJECTSTELL_API AEnemyCtrl : public AAIController
 {
@@ -16,7 +13,8 @@ class PROJECTSTELL_API AEnemyCtrl : public AAIController
 public:
 	AEnemyCtrl();
 	virtual void OnPossess(APawn* aPawn)override;
-private:
+protected:
+	class UBlackboardComponent* blackboard;
 	UPROPERTY()
 		class UBehaviorTree* BTAsset;
 	UPROPERTY()
@@ -25,8 +23,12 @@ public:
 	static const FName HomePosKey;
 	static const FName PatrolPosKey;
 	static const FName TargetActorKey;
+	static const FName isGuardKey;
 public:
 	void RunBT();
 	void StopBT();
-	
+
+public:
+	virtual void PlayerFind();
+
 };

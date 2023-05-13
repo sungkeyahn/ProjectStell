@@ -100,6 +100,6 @@ public:
 	FItemInfoStruct* GetItem(int32 ID); //인벤에 해당 아이템이 있는지 체크후 데이터에 접근
 	TMap<int32, FItemInfoStruct> GetInventory();
 	UFUNCTION(BlueprintCallable)
-		bool ItemAcquisition(FItemInfoStruct info); //인게임에서 아이템 액터에 닿았을 때 호출될 함수 ,현재 인벤 상태를 체크해서 먹을수 있으면 추가
+		AWeapon* ItemAcquisition(FItemInfoStruct info); //인게임에서 아이템 액터에 닿았을 때 호출될 함수 ,현재 인벤 상태를 체크해서 먹을수 있으면 추가
 	//인벤에 대한 변경값이 생길경우에 대한 델리게이트 필요할듯?
 };

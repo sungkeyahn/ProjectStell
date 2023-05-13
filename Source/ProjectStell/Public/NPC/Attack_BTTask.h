@@ -15,9 +15,4 @@ protected:
 	virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSecondes) override;
 private:
 	bool IsAttacking = false;
-	/*
-	* 공격 패턴에 대하여 어떤 방식으로 결정할 것인가?
-	*/
-
-
 };

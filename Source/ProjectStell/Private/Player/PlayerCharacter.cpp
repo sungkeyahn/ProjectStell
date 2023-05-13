@@ -223,7 +223,7 @@ void APlayerCharacter::PutOnWeapon(AWeapon* newWeapon, int hand) //매개 변수를 �
 			leftWeapon->Destroy();
 			leftWeapon = nullptr;
 		}
-		newWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("hand_lSocket"));
+		newWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, newWeapon->LeftSocketName);
 		newWeapon->SetOwner(this);
 		leftWeapon = newWeapon;
 	}
@@ -235,7 +235,7 @@ void APlayerCharacter::PutOnWeapon(AWeapon* newWeapon, int hand) //매개 변수를 �
 			rightWeapon->Destroy();
 			rightWeapon = nullptr;
 		}
-		newWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("hand_rSocket"));
+		newWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, newWeapon->RightSocketName);
 		newWeapon->SetOwner(this);
 		rightWeapon = newWeapon;
 	}
@@ -304,11 +304,13 @@ TMap<int32, FItemInfoStruct> APlayerCharacter::GetInventory()
 {
 	return Inventory;
 }
-bool APlayerCharacter::ItemAcquisition(FItemInfoStruct info)
+AWeapon* APlayerCharacter::ItemAcquisition(FItemInfoStruct info)
 {	
 	/*이 함수에서는 정상적으로 월드에 존재하는 아이템 인지를 검사
 	if (AddItem(info)) return true;
 	else return false;*/
+	auto NewWeapon = GetWorld()->SpawnActor<AWeapon>(info.ItemClass, FVector::ZeroVector, FRotator::ZeroRotator);
+	/*
 	if (info.Type== EItemType::Weapon)
 	{
 		auto NewWeapon = GetWorld()->SpawnActor<AWeapon>(info.ItemClass, FVector::ZeroVector, FRotator::ZeroRotator);
@@ -319,8 +321,8 @@ bool APlayerCharacter::ItemAcquisition(FItemInfoStruct info)
 		else if (leftWeapon != nullptr && rightWeapon != nullptr)
 			PutOnWeapon(NewWeapon, 0);
 	}
-	return true;
-
+	*/
+	return NewWeapon;
 }
 void APlayerCharacter::KillPlayer()
 {

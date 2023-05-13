@@ -116,7 +116,6 @@ void UComboManager::AttackCheck()
 		ECollisionChannel::ECC_GameTraceChannel2,
 		FCollisionShape::MakeSphere(CurrentAttackInfo.AttackRadius),
 		params);
-/*
 #ifdef ENABLE_DRAW_DEBUG
 	FVector traceVec = character->GetActorForwardVector() * CurrentAttackInfo.AttackRange;
 	FVector center = character->GetActorLocation() + traceVec * 0.5f;
@@ -126,7 +125,6 @@ void UComboManager::AttackCheck()
 	float debugLifeTime = 5.0f;
 	DrawDebugCapsule(GetWorld(), center, halfheight, CurrentAttackInfo.AttackRadius, capsuleRot, drawColor, false, debugLifeTime);
 #endif
-*/
 	if (bResult)
 	{
 		for (auto hitResult : hitResults)

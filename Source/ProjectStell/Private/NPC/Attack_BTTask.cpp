@@ -1,7 +1,6 @@
 #include "NPC/Attack_BTTask.h"
 #include "NPC/Enemy.h"
 #include "NPC/EnemyCtrl.h"
-
 UAttack_BTTask::UAttack_BTTask()
 {
 	bNotifyTick = true;
@@ -18,12 +17,11 @@ EBTNodeResult::Type UAttack_BTTask::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 	EBTNodeResult::Type Result = Super::ExecuteTask(OwnerComp, NodeMemory);
 
 	auto MonsterCharacter = Cast<AEnemy>(OwnerComp.GetAIOwner()->GetPawn());
-	if (nullptr == MonsterCharacter)
-		return EBTNodeResult::Failed;
-
-	/*공격 패턴을 결정하는 로직이 필요*/
-	MonsterCharacter->Attack(0);
+	if (nullptr == MonsterCharacter) return EBTNodeResult::Failed;
+	
 	IsAttacking = true;
-	MonsterCharacter->OnAttackEnd.AddLambda([this]() -> void {IsAttacking = false;});
-	return EBTNodeResult::Succeeded;
+	MonsterCharacter->OnAttackEnd.AddLambda([this]() -> void {IsAttacking = false; });
+	MonsterCharacter->Attack(0);
+	
+	return EBTNodeResult::InProgress;
 }
