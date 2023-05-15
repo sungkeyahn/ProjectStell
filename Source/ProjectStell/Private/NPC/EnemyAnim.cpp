@@ -18,7 +18,7 @@ void UEnemyAnim::PlayEnemyMontage(class UAnimMontage* montage)
 	if (!IsDead)
 		Montage_Play(montage, 1.0f);
 }
-void UEnemyAnim::AnimNotify_AttackHitCheck()
+void UEnemyAnim::AnimNotify_HitCheck()
 {
 	OnAttackHitCheck.Broadcast();
 }

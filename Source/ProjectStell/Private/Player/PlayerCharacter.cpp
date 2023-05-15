@@ -29,11 +29,16 @@ APlayerCharacter::APlayerCharacter()
 	GetCapsuleComponent()->SetCapsuleHalfHeight(88.0f);
 	GetCapsuleComponent()->SetCapsuleRadius(34.0f);
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("PlayerCharacter"));
+	
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -88.0f), FRotator(0.0f, -90.0f, 0.0f));
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationSingleNode);
-	GetCharacterMovement()->JumpZVelocity = 800.0f;
-	springArm->SetRelativeRotation(FRotator::ZeroRotator);
-	springArm->TargetArmLength = 400.0f;
+
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f);
+
+	//GetCharacterMovement()->bOrientRotationToMovement = false;
+	//GetCharacterMovement()->bUseControllerDesiredRotation = true;
+
 
 	//애셋 바인딩
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> Skin(TEXT("SkeletalMesh'/Game/MercenaryWarrior/Meshes/SK_MercenaryWarrior_WithHelmet.SK_MercenaryWarrior_WithHelmet'"));
@@ -56,6 +61,7 @@ void APlayerCharacter::BeginPlay()
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	/*
 	springArm->TargetArmLength = FMath::FInterpTo(springArm->TargetArmLength, armLengthTo, DeltaTime, armLengthSpeed);
 	if (directionToMove.SizeSquared() > 0.0f)
 	{
@@ -64,7 +70,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 			GetController()->SetControlRotation(FRotationMatrix::MakeFromX(directionToMove).Rotator());
 			AddMovementInput(directionToMove);
 		}
-	}
+	}*/
+
 }
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -113,13 +120,13 @@ void APlayerCharacter::PostInitializeComponents()
 
 void APlayerCharacter::UpDown(float NewAxisValue)
 {
-	directionToMove.X = NewAxisValue;
-	//AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::X), NewAxisValue);
+	AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::X), NewAxisValue);
+	//directionToMove.X = NewAxisValue;
 }
 void APlayerCharacter::LeftRight(float NewAxisValue)
 {
-	directionToMove.Y = NewAxisValue;
-	//AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::Y), NewAxisValue);
+	AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::Y), NewAxisValue);
+	//directionToMove.Y = NewAxisValue;
 }
 void APlayerCharacter::LookUp(float NewAxisValue)
 {
@@ -127,7 +134,7 @@ void APlayerCharacter::LookUp(float NewAxisValue)
 }
 void APlayerCharacter::Turn(float NewAxisValue)
 {
-	//AddControllerYawInput(NewAxisValue * 45.f * GetWorld()->GetDeltaSeconds());
+	AddControllerYawInput(NewAxisValue * 45.f * GetWorld()->GetDeltaSeconds());
 }
 void APlayerCharacter::LeftAttack()
 {
@@ -165,7 +172,7 @@ void APlayerCharacter::Evasion()
 	const FRotator YawRotation(0, Rotation.Yaw, 0);
 	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 	LaunchCharacter(Direction * 2000.f, true, true);
-	GetController()->SetControlRotation(FRotationMatrix::MakeFromX(Direction).Rotator());
+	//GetController()->SetControlRotation(FRotationMatrix::MakeFromX(Direction).Rotator());
 	anim->PlayPlayerMontage(DashMontage);
 	Combo->AttackReset();
 }
@@ -185,17 +192,21 @@ AWeapon* APlayerCharacter::GetRightWeapon()
 
 void APlayerCharacter::DefaultViewSetting()
 {
-	armLengthTo = 400.0f;// == springArm->TargetArmLength = 800.0f;
-	armRotationTo = FRotator(-45.0f, 0.0f, 0.0f);// == springArm->SetRelativeRotation(FRotator(-45.0f,0.0f,0.0f));
-	springArm->bUsePawnControlRotation = false;
-	springArm->bInheritPitch = false;
+	camera->bUsePawnControlRotation = true;
+	springArm->SetRelativeLocation(FVector(-60.0f, 0.0f, 0.0f));
+	springArm->SetRelativeRotation(FRotator::ZeroRotator);
+
+	springArm->bEnableCameraLag = true;
+	springArm->CameraLagSpeed = 20.0;
+	springArm->TargetArmLength = 450.0f;
+	springArm->bUsePawnControlRotation = true;
+	//springArm->bEnableCameraRotationLag = true;
+
+	springArm->bInheritPitch = true;
 	springArm->bInheritRoll = false;
-	springArm->bInheritYaw = false;
-	springArm->bDoCollisionTest = false;
+	springArm->bInheritYaw = true;
+
 	bUseControllerRotationYaw = false;
-	GetCharacterMovement()->bOrientRotationToMovement = false;
-	GetCharacterMovement()->bUseControllerDesiredRotation = true;
-	GetCharacterMovement()->RotationRate = FRotator(0.0f, 720.0f, 0.0f);//540.f , 720.f
 }
 float APlayerCharacter::TakeDamage(float DamageAmout, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
@@ -260,13 +271,21 @@ void APlayerCharacter::CharacterDestroyTimer()
 		auto ps = Cast<APlayerCharacterState>(GetPlayerState());
 		if (nullptr != ps) ps->AddDeadCount();
 		//아래 코드들은 한번만 실행해야함 타이머 코드 추가할 때 조심
-		leftWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-		leftWeapon->Destroy();
+		if (leftWeapon!=nullptr)
+		{
+			leftWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+			leftWeapon->Destroy();
+		}
+		if (rightWeapon != nullptr)
+		{
+			rightWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+			rightWeapon->Destroy();
+		}
 		leftWeapon = nullptr;
-		rightWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-		rightWeapon->Destroy();
 		rightWeapon = nullptr;
 		SetActorHiddenInGame(true);
+		
+		PlayerCtrl->GameOver();
 	}
 }
 void APlayerCharacter::LoadInvenData()

@@ -23,11 +23,12 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta = (AllowPrivateAccess = true))
 		class UAnimMontage* GuardMontage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Anim, Meta = (AllowPrivateAccess = true))
-		class UAnimMontage* GuardAttackMontage;
+		FMonsterAttackInfoStruct GuardAttackInfo;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = isGuard, Meta = (AllowPrivateAccess = true))
 		float GuardTime = 3.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = isGuard, Meta = (AllowPrivateAccess = true))
 		bool isGuard =false;
+
 public:
 	FOnGuardEndDelegate OnGuardEnd;
 	void Guard();

@@ -29,6 +29,7 @@ void APlayerCharacterState::AddDeadCount()
 {
 	DeadCount += 1;
 	SavePlayerData();
+	/*여기서 죽음 처리*/
 
 }
 int32 APlayerCharacterState::GetDeadCount()

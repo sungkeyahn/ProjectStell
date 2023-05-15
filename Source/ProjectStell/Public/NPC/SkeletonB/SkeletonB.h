@@ -6,12 +6,12 @@
 #include "NPC/Enemy.h"
 #include "SkeletonB.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class PROJECTSTELL_API ASkeletonB : public AEnemy
 {
 	GENERATED_BODY()
-	
+public:
+	ASkeletonB();
+	void WakeUp();
 };

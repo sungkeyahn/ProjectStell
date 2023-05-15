@@ -35,12 +35,12 @@ float ASkeletonA::TakeDamage(float Damage, FDamageEvent const& DamageEvent, ACon
 			OnGuardEnd.Broadcast();
 			SetMonsterState(EMonsterState::Idle);
 			GetWorldTimerManager().ClearTimer(GuardTimerHandle);
-			Attack(1);
+			Attack(GuardAttackInfo);
 		}
 	}
 	return FinalDamage;
 }
-void ASkeletonA::WakeUp() //ÀÌ³ðµµ Å×½ºÅ©·Î »©ÀÚ
+void ASkeletonA::WakeUp() 
 {
 	anim->IsSleep = false;
 }

@@ -1,6 +1,7 @@
 #include "NPC/Attack_BTTask.h"
 #include "NPC/Enemy.h"
 #include "NPC/EnemyCtrl.h"
+#include "Math/UnrealMathUtility.h"
 UAttack_BTTask::UAttack_BTTask()
 {
 	bNotifyTick = true;
@@ -21,7 +22,7 @@ EBTNodeResult::Type UAttack_BTTask::ExecuteTask(UBehaviorTreeComponent& OwnerCom
 	
 	IsAttacking = true;
 	MonsterCharacter->OnAttackEnd.AddLambda([this]() -> void {IsAttacking = false; });
-	MonsterCharacter->Attack(0);
+	MonsterCharacter->Attack(FMath::RandRange(0, MonsterCharacter->AttackPatten.Num()-1));
 	
 	return EBTNodeResult::InProgress;
 }

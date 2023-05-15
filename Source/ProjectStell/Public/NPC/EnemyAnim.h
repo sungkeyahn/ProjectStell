@@ -22,7 +22,7 @@ public:
 	FOnAttackHitCheckDeletegate OnAttackHitCheck;
 private:
 	UFUNCTION()
-		void AnimNotify_AttackHitCheck();
+		void AnimNotify_HitCheck();
 
 //상태 관련
 public:

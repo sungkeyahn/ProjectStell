@@ -4,9 +4,13 @@
 #include "Player/PlayerCharaterCtrl.h"
 #include "UI/GamePauseMenuWidget.h"
 #include "UI/GameClearMenuWidget.h"
+#include "UI/GameOverMenuWidget.h"
 #include "UI/CharacterHUDWidget.h"
 #include "UI/InventoryWidget.h"
 #include "UI/ItemSlotWidget.h"
+
+
+
 APlayerCharaterCtrl::APlayerCharaterCtrl()
 {
 	static ConstructorHelpers::FClassFinder<UGamePauseMenuWidget> MENU(TEXT("WidgetBlueprint'/Game/1_UI/UI_Menu.UI_Menu_C'"));
@@ -14,15 +18,19 @@ APlayerCharaterCtrl::APlayerCharaterCtrl()
 
 	static ConstructorHelpers::FClassFinder<UGameClearMenuWidget> UI(TEXT("WidgetBlueprint'/Game/1_UI/UI_Clear.UI_Clear_C'"));
 	if (UI.Succeeded()) ClearWidgetClass = UI.Class;
+
+	static ConstructorHelpers::FClassFinder<UGameOverMenuWidget> GameOverUI(TEXT("WidgetBlueprint'/Game/1_UI/UI_GameOver.UI_GameOver_C'"));
+	if (GameOverUI.Succeeded()) GameOverWidgetClass = GameOverUI.Class;
 	
 	static ConstructorHelpers::FClassFinder<UInventoryWidget> invenUI(TEXT("WidgetBlueprint'/Game/1_UI/Inventory.Inventory_C'"));
 	if (invenUI.Succeeded()) InventoryWidgetClass = invenUI.Class;
 
 	static ConstructorHelpers::FClassFinder<UItemSlotWidget> itemSlotUI(TEXT("WidgetBlueprint'/Game/1_UI/InvenSlot.InvenSlot_C'"));
-	if (invenUI.Succeeded()) ItemSlotWidgetClass = itemSlotUI.Class;
+	if (itemSlotUI.Succeeded()) ItemSlotWidgetClass = itemSlotUI.Class;
 	
 	static ConstructorHelpers::FClassFinder<UCharacterHUDWidget> HUDUI(TEXT("WidgetBlueprint'/Game/1_UI/PlayerHUD.PlayerHUD_C'"));
 	if (HUDUI.Succeeded()) HUDWidgetClass = HUDUI.Class;
+
 }
 void APlayerCharaterCtrl::PostInitializeComponents()
 {
@@ -81,6 +89,13 @@ void APlayerCharaterCtrl::GameClear()
 	ClearWidget = CreateWidget<UGameClearMenuWidget>(this, ClearWidgetClass);
 	if (nullptr == ClearWidget)return;
 	ClearWidget->AddToViewport();
+	ChangeInputMode(1);
+}
+void APlayerCharaterCtrl::GameOver()
+{
+	GameOverWidget = CreateWidget<UGameOverMenuWidget>(this, GameOverWidgetClass);
+	if (nullptr == GameOverWidget)return;
+	GameOverWidget->AddToViewport();
 	ChangeInputMode(1);
 }
 void APlayerCharaterCtrl::ShowInventoryUI()

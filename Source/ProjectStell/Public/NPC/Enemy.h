@@ -74,11 +74,13 @@ private:
 		float SenseRange = 400.f;
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 		bool IsAttacking = false;
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Attack, Meta = (AllowPrivateAccess = true))
 		TArray<FMonsterAttackInfoStruct> AttackPatten;
-public:
 	FMonsterAttackInfoStruct CurrentAttackinfo;
 	virtual void Attack(int32 infoIndex);
+	virtual void Attack(FMonsterAttackInfoStruct attackInfo);
+
 	void AttackCheck();
 	FOnAttackEndDelegate OnAttackEnd;
 

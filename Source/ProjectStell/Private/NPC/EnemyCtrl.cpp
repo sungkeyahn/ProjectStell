@@ -54,5 +54,5 @@ void AEnemyCtrl::StopBT()
 }
 void AEnemyCtrl::PlayerFind() //이거아마 스켈레톤 컨트롤러에 들어갈 기능인듯 
 {
-	GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Red, FString::Printf(TEXT("aaaaaa")));
+	//GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Red, FString::Printf(TEXT("aaaaaa")));
 }

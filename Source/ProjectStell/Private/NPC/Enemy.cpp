@@ -136,6 +136,15 @@ void AEnemy::Attack(int32 infoIndex)
 		IsAttacking = true;
 	}
 }
+void AEnemy::Attack(FMonsterAttackInfoStruct attackInfo)
+{
+	if (!IsAttacking)
+	{
+		anim->PlayEnemyMontage(attackInfo.montage);
+		CurrentAttackinfo = attackInfo;
+		IsAttacking = true;
+	}
+}
 void AEnemy::AttackCheck()
 {
 	FHitResult hitResult;
@@ -160,6 +169,8 @@ void AEnemy::AttackCheck()
 	{
 		if (hitResult.GetActor())
 		{
+			GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Red, FString::Printf(TEXT("asdasd")));
+
 			FDamageEvent damageEvent;
 			hitResult.GetActor()->TakeDamage(CurrentAttackinfo.Damage, damageEvent, GetController(), this);
 		}

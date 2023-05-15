@@ -32,6 +32,8 @@ private:
 	UPROPERTY()
 		class UGameClearMenuWidget* ClearWidget;
 	UPROPERTY()
+		class UGameOverMenuWidget* GameOverWidget;
+	UPROPERTY()
 		class UCharacterHUDWidget* HUDWidget;
 	UPROPERTY()
 		class UInventoryWidget* InventoryWidget;
@@ -44,6 +46,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Ui)
 		TSubclassOf<class UGameClearMenuWidget>ClearWidgetClass;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Ui)
+		TSubclassOf<class UGameOverMenuWidget>GameOverWidgetClass;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Ui)
 		TSubclassOf<class UInventoryWidget>InventoryWidgetClass;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Ui)
 		TSubclassOf<class UItemSlotWidget> ItemSlotWidgetClass;
@@ -52,8 +56,10 @@ protected:
 public:
 	void GamePause();//UI띄어주는 역할
 	void GameClear();
+	void GameOver();
 	void ShowInventoryUI();
 	class UCharacterHUDWidget* GetHUDWidget() const;
 	class UInventoryWidget* GetInventoryWidget() const;
 	class UItemSlotWidget* GetItemSlotWidget() const;
+
 };

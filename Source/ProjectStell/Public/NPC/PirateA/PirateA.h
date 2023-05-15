@@ -6,9 +6,6 @@
 #include "NPC/Enemy.h"
 #include "PirateA.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class PROJECTSTELL_API APirateA : public AEnemy
 {
