@@ -153,7 +153,7 @@ void AEnemy::AttackCheck()
 	(
 		hitResult,GetActorLocation(),
 		GetActorLocation() + GetActorForwardVector() * CurrentAttackinfo.AttackRange,
-		FQuat::Identity,ECollisionChannel::ECC_GameTraceChannel1,
+		FQuat::Identity,ECollisionChannel::ECC_GameTraceChannel5,
 		FCollisionShape::MakeSphere(CurrentAttackinfo.AttackRadius),params
 	);
 #ifdef ENABLE_DRAW_DEBUG
@@ -169,8 +169,6 @@ void AEnemy::AttackCheck()
 	{
 		if (hitResult.GetActor())
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 4.f, FColor::Red, FString::Printf(TEXT("asdasd")));
-
 			FDamageEvent damageEvent;
 			hitResult.GetActor()->TakeDamage(CurrentAttackinfo.Damage, damageEvent, GetController(), this);
 		}

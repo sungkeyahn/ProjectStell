@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "ProjectStell.h"
@@ -59,11 +57,16 @@ public:
 private:
 	class AWeapon* leftWeapon;
 	class AWeapon* rightWeapon;
+	void Equipment_Left();
+	void Equipment_Right();
+	UFUNCTION(BlueprintCallable)
+		void PutOnWeapon(class AWeapon* newWeapon, int hand = 0);
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Equipment)
+		class AItem* ContactedItem =nullptr;
 	class AWeapon* GetLeftWeapon();
 	class AWeapon* GetRightWeapon();
-	UFUNCTION(BlueprintCallable)
-		void PutOnWeapon(class AWeapon* newWeapon, int hand=0);
+
 //ÄÞº¸ °ü·Ã	
 	UPROPERTY(VisibleAnywhere, Category = Combo)
 		class UComboManager* Combo;

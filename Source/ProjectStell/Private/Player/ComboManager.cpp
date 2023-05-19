@@ -113,7 +113,7 @@ void UComboManager::AttackCheck()
 		character->GetActorLocation(),
 		character->GetActorLocation() + character->GetActorForwardVector() * CurrentAttackInfo.AttackRange,
 		FQuat::Identity,
-		ECollisionChannel::ECC_GameTraceChannel2,
+		ECollisionChannel::ECC_GameTraceChannel4,
 		FCollisionShape::MakeSphere(CurrentAttackInfo.AttackRadius),
 		params);
 #ifdef ENABLE_DRAW_DEBUG

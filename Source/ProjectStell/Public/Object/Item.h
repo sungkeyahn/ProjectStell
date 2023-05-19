@@ -40,17 +40,28 @@ public:
 	AItem();
 protected:
 	virtual void BeginPlay() override;
-public:	
-	virtual void Tick(float DeltaTime) override;
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh, Meta = (AllowPrivateAccess = true))
 		class USkeletalMeshComponent* mesh;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Item, Meta = (AllowPrivateAccess = true))
 		FItemInfoStruct info;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = box, Meta = (AllowPrivateAccess = true))
+		UBoxComponent* box;
 	UPROPERTY(VisibleAnywhere)
 		URotatingMovementComponent* movement;
 public: 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
+		float reSpawnTime;
 		FItemInfoStruct GetItemInfo();
+		void Acquiring_Item();
+		FTimerHandle ItemReSpawnTimmerHandle;
+private:
+	void ReSpawnItemTimmer();
+	float CurSpawnTime;
+		/*플레이어가 아이템에 접촉해서 장착 버튼을 누르면 호출될 
+		* 아이템 사라지게 하기 함수 와 자동으로 다시 나타나게 할 함수 델리게이트로 바인딩하기 언바인딩하기 
+		* 
+		*/
 
 };

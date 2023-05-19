@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "Player/PlayerCharacter.h"
 #include "Player/PlayerCharacterAnim.h"
 #include "Player/PlayerCharaterCtrl.h"
@@ -11,6 +8,7 @@
 #include "UI/CharacterHUDWidget.h"
 #include "UI/InventoryWidget.h"
 #include "DrawDebugHelpers.h"
+#include "Object/Item.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -84,6 +82,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction(TEXT("Evasion"), EInputEvent::IE_Pressed, this, &APlayerCharacter::Evasion);
 	PlayerInputComponent->BindAction(TEXT("LeftAttack"), EInputEvent::IE_Pressed, this, &APlayerCharacter::LeftAttack);
 	PlayerInputComponent->BindAction(TEXT("RightAttack"), EInputEvent::IE_Pressed, this, &APlayerCharacter::RightAttack);
+	PlayerInputComponent->BindAction(TEXT("Equipment_Left"), EInputEvent::IE_Pressed, this, &APlayerCharacter::Equipment_Left);
+	PlayerInputComponent->BindAction(TEXT("Equipment_Right"), EInputEvent::IE_Pressed, this, &APlayerCharacter::Equipment_Right);
 	PlayerInputComponent->BindAction(TEXT("KillPlayer"), EInputEvent::IE_Pressed, this, &APlayerCharacter::KillPlayer);
 }
 void APlayerCharacter::PostInitializeComponents()
@@ -112,6 +112,7 @@ void APlayerCharacter::PostInitializeComponents()
 	{
 	anim->SetDeadAnim();
 	SetActorEnableCollision(false);
+	PlayerCtrl->ChangeInputMode(1);
 	GetWorldTimerManager().SetTimer(CharacterDstroyTimerHandle, this, &APlayerCharacter::CharacterDestroyTimer, 1.0f, true);
 	}
 	);
@@ -180,6 +181,27 @@ void APlayerCharacter::Evasion()
 UPlayerCharacterAnim* APlayerCharacter::GetCharacterAnim()
 {
 	return anim;
+}
+void APlayerCharacter::Equipment_Left()
+{
+	//FItemInfoStruct ContactedItemInfo -> 변수로 아이템이 닿으면 해당 값을 변경시킴 
+	if (ContactedItem == nullptr)return;
+
+	if (ContactedItem->GetItemInfo().ID != -1)
+	{
+		PutOnWeapon(ItemAcquisition(ContactedItem->GetItemInfo()), 0);
+		ContactedItem->Acquiring_Item();
+	}
+}
+void APlayerCharacter::Equipment_Right()
+{
+	if (ContactedItem == nullptr)return;
+
+	if (ContactedItem->GetItemInfo().ID != -1)
+	{
+		PutOnWeapon(ItemAcquisition(ContactedItem->GetItemInfo()), 1);
+		ContactedItem->Acquiring_Item();
+	}
 }
 AWeapon* APlayerCharacter::GetLeftWeapon()
 {
