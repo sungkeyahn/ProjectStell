@@ -71,7 +71,7 @@ public:
 private:
 	FVector DirectionToMove = FVector::ZeroVector;
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Sense, Meta = (AllowPrivateAccess = true))
-		float SenseRange = 400.f;
+		float SenseRange = 500.f;
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
 		bool IsAttacking = false;
 public:

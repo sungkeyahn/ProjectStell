@@ -101,9 +101,7 @@ void AEnemy::SetInGameState(EEnemyStateInGame newState)
 		}
 		case EEnemyStateInGame::Dead:
 		{
-			SetActorEnableCollision(false);
 			SetCanBeDamaged(false);
-			GetMesh()->SetHiddenInGame(false);
 			anim->IsDead=true;
 			EnemyCtrl->StopBT();
 			GetWorld()->GetTimerManager().SetTimer(DeadTimerHandle, FTimerDelegate::CreateLambda([this]()->void
