@@ -52,18 +52,22 @@ protected:
 	void DefaultViewSetting();
 //피격 관련
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Hit)
+		class USoundBase* HitSound;
 	virtual float TakeDamage(float DamageAmout,struct FDamageEvent const& DamageEvent,class AController* EventInstigator, AActor* DamageCauser)override;
+
 //무기 관련 
 private:
 	class AWeapon* leftWeapon;
 	class AWeapon* rightWeapon;
+	class AItem* ContactedItem = nullptr;
 	void Equipment_Left();
 	void Equipment_Right();
 	UFUNCTION(BlueprintCallable)
 		void PutOnWeapon(class AWeapon* newWeapon, int hand = 0);
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Equipment)
-		class AItem* ContactedItem =nullptr;
+	UFUNCTION(BlueprintCallable)
+		void SetContactedItem(class AItem* Item=nullptr);
 	class AWeapon* GetLeftWeapon();
 	class AWeapon* GetRightWeapon();
 
@@ -73,6 +77,17 @@ public:
 //스텟관련
 	UPROPERTY(VisibleAnywhere, Category = Stat)
 		class UPlayerStat* Stat;
+//hp회복기능 
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HPRegen)
+		float Regeneration = 1.f; //재생량 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = HPRegen)
+		float HPRegenerationTime = 5.f; //재생 쿨타임 
+private:
+	float CurRegenerationTime = 0.f; 
+	FTimerHandle HPRegenerationTimerHandle;
+	void HPRegeneration();
+
 //대쉬 관련
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Dash, Meta = (AllowPrivateAccess = true))

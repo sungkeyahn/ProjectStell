@@ -101,9 +101,13 @@ void AEnemy::SetInGameState(EEnemyStateInGame newState)
 		}
 		case EEnemyStateInGame::Dead:
 		{
+			//GetCapsuleComponent()->SetSimulatePhysics(false);
+			//GetCapsuleComponent()->SetActive(false);
+			//GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 			SetCanBeDamaged(false);
 			anim->IsDead=true;
 			EnemyCtrl->StopBT();
+			GetWorldTimerManager().ClearTimer(SternTimerHandle);
 			GetWorld()->GetTimerManager().SetTimer(DeadTimerHandle, FTimerDelegate::CreateLambda([this]()->void
 			{ 	
 				++DeadTime;

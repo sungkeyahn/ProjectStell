@@ -55,10 +55,14 @@ void APlayerCharacter::BeginPlay()
 	//DisableInput(PlayerController);
 	PlayerCtrl->GetHUDWidget()->BindCharacterStat(Stat);
 	PlayerCtrl->GetInventoryWidget()->BindCharacterInventory(this);
+
+	GetWorldTimerManager().SetTimer(HPRegenerationTimerHandle, this, &APlayerCharacter::HPRegeneration, 1.0f, true);
 }
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+
 	/*
 	springArm->TargetArmLength = FMath::FInterpTo(springArm->TargetArmLength, armLengthTo, DeltaTime, armLengthSpeed);
 	if (directionToMove.SizeSquared() > 0.0f)
@@ -113,6 +117,7 @@ void APlayerCharacter::PostInitializeComponents()
 	anim->SetDeadAnim();
 	SetActorEnableCollision(false);
 	PlayerCtrl->ChangeInputMode(1);
+	GetWorldTimerManager().ClearTimer(HPRegenerationTimerHandle);
 	GetWorldTimerManager().SetTimer(CharacterDstroyTimerHandle, this, &APlayerCharacter::CharacterDestroyTimer, 1.0f, true);
 	}
 	);
@@ -203,6 +208,10 @@ void APlayerCharacter::Equipment_Right()
 		ContactedItem->Acquiring_Item();
 	}
 }
+void APlayerCharacter::SetContactedItem(AItem* Item)
+{
+	ContactedItem = Item;
+}
 AWeapon* APlayerCharacter::GetLeftWeapon()
 {
 	return leftWeapon;
@@ -210,6 +219,16 @@ AWeapon* APlayerCharacter::GetLeftWeapon()
 AWeapon* APlayerCharacter::GetRightWeapon()
 {
 	return rightWeapon;
+}
+
+void APlayerCharacter::HPRegeneration()
+{
+	CurRegenerationTime++;
+	if (CurRegenerationTime >= HPRegenerationTime)
+	{
+		CurRegenerationTime = 0.f; 
+		Stat->SetDamage(-Regeneration);
+	}
 }
 
 void APlayerCharacter::DefaultViewSetting()
@@ -234,6 +253,7 @@ float APlayerCharacter::TakeDamage(float DamageAmout, FDamageEvent const& Damage
 {
 	const float FinalDamage = Super::TakeDamage(DamageAmout, DamageEvent, EventInstigator, DamageCauser);
 	Stat->SetDamage(FinalDamage);
+	UGameplayStatics::PlaySoundAtLocation(this,HitSound,GetActorLocation());
 	return FinalDamage;
 }
 void APlayerCharacter::PutOnWeapon(AWeapon* newWeapon, int hand) //매개 변수를 아이템으로 바꿀 예정
