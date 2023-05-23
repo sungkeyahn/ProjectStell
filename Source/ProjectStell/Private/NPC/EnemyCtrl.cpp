@@ -11,7 +11,8 @@ const FName AEnemyCtrl::HomePosKey(TEXT("HomePos")); //스폰위치
 const FName AEnemyCtrl::PatrolPosKey(TEXT("PatrolPos"));
 const FName AEnemyCtrl::TargetActorKey(TEXT("TargetActor"));
 const FName AEnemyCtrl::isGuardKey(TEXT("Guard"));
-
+const FName AEnemyCtrl::isSummonKey(TEXT("Summon"));
+const FName AEnemyCtrl::isSkillKey(TEXT("Skill"));
 AEnemyCtrl::AEnemyCtrl()
 {
 	static ConstructorHelpers::FObjectFinder<UBlackboardData> BBobj(TEXT("BlackboardData'/Game/1_AI/EnemyBB.EnemyBB'"));

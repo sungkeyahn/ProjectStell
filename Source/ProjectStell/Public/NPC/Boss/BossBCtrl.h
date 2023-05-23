@@ -6,12 +6,14 @@
 #include "NPC/EnemyCtrl.h"
 #include "BossBCtrl.generated.h"
 
-/**
- * 
- */
+
 UCLASS()
 class PROJECTSTELL_API ABossBCtrl : public AEnemyCtrl
 {
 	GENERATED_BODY()
-	
+public:
+	ABossBCtrl();
+	//스킬을 활성화 시키는 함수 
+	void SkillActivate(bool b);
+
 };

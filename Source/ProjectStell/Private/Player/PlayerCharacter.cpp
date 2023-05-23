@@ -126,11 +126,13 @@ void APlayerCharacter::PostInitializeComponents()
 
 void APlayerCharacter::UpDown(float NewAxisValue)
 {
+	if (anim->IsAnyMontagePlaying() == false)
 	AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::X), NewAxisValue);
 	//directionToMove.X = NewAxisValue;
 }
 void APlayerCharacter::LeftRight(float NewAxisValue)
 {
+	if (anim->IsAnyMontagePlaying() == false)
 	AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::Y), NewAxisValue);
 	//directionToMove.Y = NewAxisValue;
 }

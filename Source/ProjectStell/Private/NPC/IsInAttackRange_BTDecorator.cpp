@@ -17,6 +17,6 @@ bool UIsInAttackRange_BTDecorator::CalculateRawConditionValue(UBehaviorTreeCompo
 	auto Target = Cast<AEnemy>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(AEnemyCtrl::TargetActorKey));
 	if (nullptr == Target) return false;
 
-	bResult = (Target->GetDistanceTo(ControllingPawn) <= 50.f); //ControllingPawn->CurrentAttackinfo.AttackRange
+	bResult = (Target->GetDistanceTo(ControllingPawn) <= Target->AttackSenseRange); //ControllingPawn->CurrentAttackinfo.AttackRange
 	return bResult;
 }

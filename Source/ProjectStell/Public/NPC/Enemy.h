@@ -68,7 +68,7 @@ public:
 	void SetMonsterState(EMonsterState newState);
 
 //공격 ,이동 관련
-private:
+protected:
 	FVector DirectionToMove = FVector::ZeroVector;
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Sense, Meta = (AllowPrivateAccess = true))
 		float SenseRange = 500.f;
@@ -77,6 +77,8 @@ private:
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Attack, Meta = (AllowPrivateAccess = true))
 		TArray<FMonsterAttackInfoStruct> AttackPatten;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Sense, Meta = (AllowPrivateAccess = true))
+		float AttackSenseRange = 100.f;
 	FMonsterAttackInfoStruct CurrentAttackinfo;
 	virtual void Attack(int32 infoIndex);
 	virtual void Attack(FMonsterAttackInfoStruct attackInfo);

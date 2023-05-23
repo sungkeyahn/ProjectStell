@@ -24,6 +24,9 @@ public:
 	static const FName PatrolPosKey;
 	static const FName TargetActorKey;
 	static const FName isGuardKey;
+	static const FName isSummonKey;
+	static const FName isSkillKey;
+
 public:
 	void RunBT();
 	void StopBT();
