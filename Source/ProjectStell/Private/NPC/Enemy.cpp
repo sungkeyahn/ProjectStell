@@ -52,7 +52,7 @@ void AEnemy::PostInitializeComponents()
 float AEnemy::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	float FinalDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
-	if (!isHit)
+	if (CurrentInGameState != EEnemyStateInGame::Dead)
 	{
 		isHit = true;
 		//공격 정보

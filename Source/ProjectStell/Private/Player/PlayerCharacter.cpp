@@ -52,42 +52,17 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 	PlayerCtrl = Cast<APlayerCharaterCtrl>(GetController());
 	if (nullptr == PlayerCtrl)return;
-	//DisableInput(PlayerController);
-	PlayerCtrl->GetHUDWidget()->BindCharacterStat(Stat);
-	PlayerCtrl->GetInventoryWidget()->BindCharacterInventory(this);
+
+	PlayerCtrl->HUDWidget->BindCharacterStat(Stat);
+	PlayerCtrl->InventoryWidget->BindCharacterInventory(this);
 
 	GetWorldTimerManager().SetTimer(HPRegenerationTimerHandle, this, &APlayerCharacter::HPRegeneration, 1.0f, true);
-}
-void APlayerCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-
-	/*
-	springArm->TargetArmLength = FMath::FInterpTo(springArm->TargetArmLength, armLengthTo, DeltaTime, armLengthSpeed);
-	if (directionToMove.SizeSquared() > 0.0f)
-	{
-		if (anim->IsAnyMontagePlaying() == false)
-		{
-			GetController()->SetControlRotation(FRotationMatrix::MakeFromX(directionToMove).Rotator());
-			AddMovementInput(directionToMove);
-		}
-	}*/
-
 }
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &APlayerCharacter::UpDown);
-	PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &APlayerCharacter::LeftRight);
-	PlayerInputComponent->BindAxis(TEXT("TurnRight"), this, &APlayerCharacter::Turn); //마우스 좌우 이동
-	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &APlayerCharacter::LookUp); //마우스 상하 이동 
-	//PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ABase_Character::Jump);
-	PlayerInputComponent->BindAction(TEXT("Evasion"), EInputEvent::IE_Pressed, this, &APlayerCharacter::Evasion);
-	PlayerInputComponent->BindAction(TEXT("LeftAttack"), EInputEvent::IE_Pressed, this, &APlayerCharacter::LeftAttack);
-	PlayerInputComponent->BindAction(TEXT("RightAttack"), EInputEvent::IE_Pressed, this, &APlayerCharacter::RightAttack);
-	PlayerInputComponent->BindAction(TEXT("Equipment_Left"), EInputEvent::IE_Pressed, this, &APlayerCharacter::Equipment_Left);
-	PlayerInputComponent->BindAction(TEXT("Equipment_Right"), EInputEvent::IE_Pressed, this, &APlayerCharacter::Equipment_Right);
+	PlayerInputComponent->BindAxis(TEXT("TurnRight"), this, &APlayerCharacter::Turn); //마우스 좌우 시점 이동
+	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &APlayerCharacter::LookUp); //마우스 상하 시점 이동 
 	PlayerInputComponent->BindAction(TEXT("KillPlayer"), EInputEvent::IE_Pressed, this, &APlayerCharacter::KillPlayer);
 }
 void APlayerCharacter::PostInitializeComponents()
@@ -128,13 +103,13 @@ void APlayerCharacter::UpDown(float NewAxisValue)
 {
 	if (anim->IsAnyMontagePlaying() == false)
 	AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::X), NewAxisValue);
-	//directionToMove.X = NewAxisValue;
+	directionToMove.X = NewAxisValue;
 }
 void APlayerCharacter::LeftRight(float NewAxisValue)
 {
 	if (anim->IsAnyMontagePlaying() == false)
 	AddMovementInput(FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::Y), NewAxisValue);
-	//directionToMove.Y = NewAxisValue;
+	directionToMove.Y = NewAxisValue;
 }
 void APlayerCharacter::LookUp(float NewAxisValue)
 {
@@ -154,33 +129,33 @@ void APlayerCharacter::RightAttack()
 }
 void APlayerCharacter::Evasion()
 {
-	//anim->IsAnyMontagePlaying()||
 	if (IsDashing || Stat->GetSpRatio() < 0.5f) return;
 	Stat->UseStamina(50);
 	GetWorldTimerManager().SetTimer(DashCoolTimerHandle, this, &APlayerCharacter::DashCoolTimer, 1.0f, true);
 	const int32 FB = directionToMove.X;
 	const int32 RL = directionToMove.Y;
-	FRotator Rotation = GetActorRotation();
+	FRotator Rotation = GetControlRotation();//GetActorRotation();
 	if (RL == 0 && FB > 0)
-		Rotation = FRotator(0, 0, 0);
+		Rotation += FRotator(0, 0, 0);
 	else if (RL == 0 && FB < 0)
-		Rotation = FRotator(0, 180, 0);
+		Rotation += FRotator(0, 180, 0);
 	else if (FB == 0 && RL > 0)
-		Rotation = FRotator(0, 90, 0);
+		Rotation += FRotator(0, 90, 0);
 	else if (FB == 0 && RL < 0)
-		Rotation = FRotator(0, -90, 0);
+		Rotation += FRotator(0, -90, 0);
 	else if (FB > 0 && RL > 0) //wd
-		Rotation = FRotator(0, 45, 0);
+		Rotation += FRotator(0, 45, 0);
 	else if (FB > 0 && RL < 0) //wa
-		Rotation = FRotator(0, -45, 0);
+		Rotation += FRotator(0, -45, 0);
 	else if (FB < 0 && RL < 0) //sa
-		Rotation = FRotator(0, -135, 0);
+		Rotation += FRotator(0, -135, 0);
 	else if (FB < 0 && RL > 0) //sd
-		Rotation = FRotator(0, 135, 0);
+		Rotation += FRotator(0, 135, 0);
 	const FRotator YawRotation(0, Rotation.Yaw, 0);
 	const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 	LaunchCharacter(Direction * 2000.f, true, true);
-	//GetController()->SetControlRotation(FRotationMatrix::MakeFromX(Direction).Rotator());
+
+	SetActorRotation(YawRotation);
 	anim->PlayPlayerMontage(DashMontage);
 	Combo->AttackReset();
 }
@@ -235,6 +210,7 @@ void APlayerCharacter::HPRegeneration()
 
 void APlayerCharacter::DefaultViewSetting()
 {
+
 	camera->bUsePawnControlRotation = true;
 	springArm->SetRelativeLocation(FVector(-60.0f, 0.0f, 0.0f));
 	springArm->SetRelativeRotation(FRotator::ZeroRotator);
@@ -329,7 +305,7 @@ void APlayerCharacter::CharacterDestroyTimer()
 		rightWeapon = nullptr;
 		SetActorHiddenInGame(true);
 		
-		PlayerCtrl->GameOver();
+		PlayerCtrl->ShowUI_GameOver();
 	}
 }
 void APlayerCharacter::LoadInvenData()

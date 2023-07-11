@@ -27,6 +27,7 @@ enum class EMonsterState :uint8
 {
 	Idle, SuperArmor, Groggy , Invincibility
 };
+
 DECLARE_MULTICAST_DELEGATE(FOnAttackEndDelegate);
 
 UCLASS()

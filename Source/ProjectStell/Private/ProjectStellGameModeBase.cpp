@@ -43,7 +43,7 @@ void AProjectStellGameModeBase::AddScore()
 		for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
 		{
 			const auto pctrl = Cast<APlayerCharaterCtrl>(It->Get());
-			if (nullptr != pctrl) pctrl->GameClear();
+			if (nullptr != pctrl) pctrl->ShowUI_GameClear();
 		}
 	}
 }

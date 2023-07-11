@@ -19,3 +19,12 @@ enum class EHitEffectType :uint8
 {
 	None = 0, Stiff,KnockBack,Airborne
 };
+UENUM(BlueprintType)
+enum class EAttackShapeType :uint8
+{
+	Line,
+	Box,
+	Sphere,
+	Capsule,
+	Weapon
+};

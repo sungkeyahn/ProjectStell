@@ -11,13 +11,11 @@ class PROJECTSTELL_API APlayerCharaterCtrl : public APlayerController
 	GENERATED_BODY()
 public:
 	APlayerCharaterCtrl();
-	virtual void PostInitializeComponents() override;
-	virtual void OnPossess(APawn* aPawn) override;
 protected:
 	virtual void SetupInputComponent() override;
 	virtual void BeginPlay() override;
 
-//입력 계층 관련
+//입력 모드 관련
 private:
 	FInputModeGameOnly GameInputMode;
 	FInputModeUIOnly UIInputMode;
@@ -25,8 +23,9 @@ private:
 public:
 	void ChangeInputMode(int32 bGameMode = 0);
 
-//인 게임UI 관련
-private:
+//GUI 관련
+public:
+	bool isInvenopen = false;
 	UPROPERTY()
 		class UGamePauseMenuWidget* MenuWidget;
 	UPROPERTY()
@@ -39,8 +38,6 @@ private:
 		class UInventoryWidget* InventoryWidget;
 	UPROPERTY()
 		class UItemSlotWidget* ItemSlotWidget;
-	bool isInvenopen=false;
-protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Ui)
 		TSubclassOf<class UGamePauseMenuWidget>MenuWidgetClass;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Ui)
@@ -53,13 +50,17 @@ protected:
 		TSubclassOf<class UItemSlotWidget> ItemSlotWidgetClass;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Ui)
 		TSubclassOf<class UCharacterHUDWidget>HUDWidgetClass;
-public:
-	void GamePause();//UI띄어주는 역할
-	void GameClear();
-	void GameOver();
-	void ShowInventoryUI();
-	class UCharacterHUDWidget* GetHUDWidget() const;
-	class UInventoryWidget* GetInventoryWidget() const;
-	class UItemSlotWidget* GetItemSlotWidget() const;
 
+	void ShowUI_GamePause();
+	void ShowUI_GameClear();
+	void ShowUI_GameOver();
+	void ShowUI_Inventory();
+
+	 void MoveForward(float newAxis);
+	 void MoveRight(float newAxis);
+	 void Evasion();
+	 void RightAttack();
+	 void LeftAttack();
+	 void LeftEquipment();
+	 void RightEquipment();
 };

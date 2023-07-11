@@ -16,12 +16,12 @@ public:
 protected:
 	virtual void BeginPlay() override;
 public:
-	virtual void Tick(float DeltaTime) override;
+
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void PostInitializeComponents()override;
 
 //키입력 바인딩 기능 관련 
-private:
+public:
 	void UpDown(float NewAxisValue);
 	void LeftRight(float NewAxisValue);
 	void LookUp(float NewAxisValue);
@@ -30,10 +30,9 @@ private:
 	void RightAttack();
 	void Evasion();
 //애니메이션 관련
-private:
+public:
 	UPROPERTY()
 		class UPlayerCharacterAnim* anim;
-public:
 	class UPlayerCharacterAnim* GetCharacterAnim();
 //컨트롤러 관련
 	class APlayerCharaterCtrl* PlayerCtrl;
@@ -61,11 +60,12 @@ private:
 	class AWeapon* leftWeapon;
 	class AWeapon* rightWeapon;
 	class AItem* ContactedItem = nullptr;
-	void Equipment_Left();
-	void Equipment_Right();
+
 	UFUNCTION(BlueprintCallable)
 		void PutOnWeapon(class AWeapon* newWeapon, int hand = 0);
 public:
+	void Equipment_Left();
+	void Equipment_Right();
 	UFUNCTION(BlueprintCallable)
 		void SetContactedItem(class AItem* Item=nullptr);
 	class AWeapon* GetLeftWeapon();

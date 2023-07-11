@@ -22,6 +22,7 @@ private:
 	FAttackInfoStruct PreAttackInfo;	
 	FAttackInfoStruct CurrentAttackInfo;
 	FAttackInfoStruct NextAttackInfo;
+	bool MakeAttackRange(TArray<FHitResult>* hitResults);
 public:
 	FAttackInfoStruct GetCurAttackInfo();
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Combo, Meta = (AllowPrivateAccess = true))
@@ -30,6 +31,7 @@ public:
 		bool CanNextAttack;
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Combo, Meta = (AllowPrivateAccess = true))
 		int32 CurrentCombo;
+
 //ÄÞº¸ °ü·Ã
 public:
 	void Attack(bool isLeftClick);
